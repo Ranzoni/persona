@@ -21,7 +21,5 @@ Run: pip install fastapi uvicorn python-dotenv langchain-ollama
 
 ## Run the AI
 
-### First option
-
-- Go to 'api' folder
+- Go to "main" folder
 - Run: python main.py
