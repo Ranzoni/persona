@@ -1,17 +1,33 @@
-import os
-from dotenv import load_dotenv
+from repository import Repository
 
 
 class HistoryConversation:
-    def __init__(self):
-        load_dotenv()
-        self.__history = []
+    def __init__(self, ip: str, persona_id: int):
+        self.__id = f'{persona_id}__{ip}'
+        self.__is_connected = False
+        self.__repo = Repository()
+
+    def __connect(self):
+        if self.__is_connected:
+            return
+
+        self.__repo.connect()
+        self.__is_connected = True
+
+    def __append_conversation(self, who: str, content: str):
+        self.__connect()
+        self.__repo.insert(
+            key=self.__id,
+            value=f'{who}: {content}'
+        )
 
     def append_human_conversation(self, content: str):
-        self.__history.append(f'Humano: {content}')
+        self.__append_conversation('Humano', content)
 
     def append_bot_conversation(self, content: str):
-        self.__history.append(f'{os.getenv('PERSONA_NAME')}: {content}')
+        self.__append_conversation('Você', content)
 
-    def get_history(self) -> str:
-        return '\n'.join(self.__history.copy())
+    def get_history(self) -> list[str]:
+        self.__connect()
+        return self.__repo.get(key=self.__id)
+    

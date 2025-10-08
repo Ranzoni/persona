@@ -1,4 +1,38 @@
-const API_URL = "http://127.0.0.1:8000/talk";
+function getIp(callback)
+{
+    function response(s)
+    {
+        callback(window.userip);
+
+        s.onload = s.onerror = null;
+        document.body.removeChild(s);
+    }
+
+    function trigger()
+    {
+        window.userip = false;
+
+        var s = document.createElement("script");
+        s.async = true;
+        s.onload = function() {
+            response(s);
+        };
+        s.onerror = function() {
+            response(s);
+        };
+
+        s.src = "https://l2.io/ip.js?var=userip";
+        document.body.appendChild(s);
+    }
+
+    if (/^(interactive|complete)$/i.test(document.readyState)) {
+        trigger();
+    } else {
+        document.addEventListener('DOMContentLoaded', trigger);
+    }
+}
+
+const API_URL = 'http://127.0.0.1:8000/talk';
 
 /* ---------- UTILITÁRIOS ---------- */
 const $messages = document.getElementById('messages');
@@ -44,16 +78,20 @@ async function sendMessage(){
   $input.focus();
   setUIBusy(true);
 
-  try{
-	const reply = await getReplyFromAPI(conversation);
-	conversation.push({role:'assistant', content:reply});
-	appendMessage(reply, 'bot');
-  }catch(err){
-	console.error(err);
-	appendMessage('Erro: não foi possível obter resposta do servidor.', 'bot', formatTime());
-  }finally{
-	setUIBusy(false);
-  }
+
+  getIp(async function (ip) {
+    try{
+      const personaId = 1;
+      const reply = await getReplyFromAPI(ip, personaId, conversation);
+      conversation.push({role:'assistant', content:reply});
+      appendMessage(reply, 'bot');
+    }catch(err){
+      console.error(err);
+      appendMessage('Erro: não foi possível obter resposta do servidor.', 'bot', formatTime());
+    }finally{
+      setUIBusy(false);
+    }
+  });
 }
 
 function setUIBusy(isBusy){
@@ -63,7 +101,7 @@ function setUIBusy(isBusy){
 }
 
 /* ---------- Função que chama a API (ou mock) ---------- */
-async function getReplyFromAPI(history){
+async function getReplyFromAPI(ip, personaId, history){
   // Se API_URL estiver vazia, usamos uma simulação local (mock)
   if(!API_URL){
 	return mockReply(history[history.length-1].content);
@@ -73,18 +111,18 @@ async function getReplyFromAPI(history){
   //const payload = { messages: history };
   const payload = { message: history[history.length-1].content };
 
-  const res = await fetch(API_URL, {
-	method: 'POST',
-	headers: { 'Content-Type': 'application/json' },
-	body: JSON.stringify(payload)
+  const res = await fetch(`${API_URL}/${ip}/${personaId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
   });
-
+  
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
-
+  
   // espera-se { reply: 'texto' } ou ajustar conforme sua API
   if(json.persona_response)
-	return json.persona_response;
+    return json.persona_response;
   throw new Error('Formato de resposta inesperado');
 }
 

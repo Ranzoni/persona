@@ -17,9 +17,9 @@ An local AI chatbot who plays any charactere.
 
 ## Install dependencies
 
-Run: pip install fastapi uvicorn python-dotenv langchain-ollama
+Run: pip install fastapi uvicorn python-dotenv langchain-ollama redis
 
 ## Run the AI
 
-- Go to "main" folder
+- Go to "api" folder
 - Run: python main.py

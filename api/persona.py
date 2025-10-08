@@ -31,5 +31,8 @@ class PersonasData:
             persona = Persona(character['id'], character['name'], character['prompt'])
             self.__personas.append(persona)
 
-    def get_personas(self) -> list[Persona]:
+    def get_all(self) -> list[Persona]:
         return self.__personas.copy()
+    
+    def get_by_id(self, id: int) -> Persona:
+        return next((persona for persona in self.__personas if persona.id() == id), None)

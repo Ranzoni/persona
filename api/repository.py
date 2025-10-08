@@ -1,0 +1,25 @@
+import redis
+import os
+
+from dotenv import load_dotenv
+
+
+class Repository:
+    def __init__(self):
+        load_dotenv()
+
+        self.__host = os.getenv('DB_HOST')
+        self.__port = os.getenv('DB_PORT')
+        self.__register_expire_seconds = os.getenv('DB_REGISTER_EXPIRE_SECONDS')
+        self.__r = None
+
+    def connect(self):
+        self.__r = redis.Redis(host=self.__host, port=self.__port, db=0)
+
+    def insert(self, key: str, value: str):
+        self.__r.rpush(key, value)
+        self.__r.expire(key, self.__register_expire_seconds)
+    
+    def get(self, key: str) -> list[str]:
+        raw_data = self.__r.lrange(key, 0, -1)
+        return [item.decode('utf-8') for item in raw_data]
