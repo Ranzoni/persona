@@ -4,9 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Persona</title>
+  <link rel="stylesheet" href="..\styles\styles.css">
+  <link rel="stylesheet" href="..\styles\loading.css">
   <link rel="stylesheet" href="..\styles\chat.css">
 </head>
 <body>
+  <div id="loading"></div>
+
   <div class="app">
     <header>
       <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;font-weight:700">AI</div>
@@ -29,6 +33,8 @@
     </main>
   </div>
 
+  <script src="..\scripts\loading.js"></script>
+  <script src="..\scripts\ip-actions.js"></script>
   <script src="..\scripts\chat.js"></script>
 </body>
 </html>

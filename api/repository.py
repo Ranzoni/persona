@@ -20,6 +20,9 @@ class Repository:
         self.__r.rpush(key, value)
         self.__r.expire(key, self.__register_expire_seconds)
     
-    def get(self, key: str) -> list[str]:
-        raw_data = self.__r.lrange(key, 0, -1)
+    def get(self, key: str, limit: int = None) -> list[str]:
+        if limit:
+            raw_data = self.__r.lrange(key, -limit, -1)
+        else:
+            raw_data = self.__r.lrange(key, 0, -1)
         return [item.decode('utf-8') for item in raw_data]

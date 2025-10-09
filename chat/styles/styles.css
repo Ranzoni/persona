@@ -1,0 +1,23 @@
+:root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --accent:#4f46e5;
+    --muted:#9ca3af;
+    --me:#0f1724
+}
+
+*{
+    box-sizing:border-box
+}
+
+html, body{
+    height:100%;
+    margin:0;
+    font-family:Inter,Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:linear-gradient(180deg,#071023 0%, #071733 100%);
+    color:#e6eef8
+}
+
+.hidden {
+    display: none !important;
+}

@@ -3,8 +3,10 @@ import os
 from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 
+from history_conversation import ConversationType
 
-def talk(prompt: str, message: str, messages_history: str):
+
+def talk(prompt: str, message: str, messages_history: list[ConversationType]):
     load_dotenv()
 
     try:
@@ -14,7 +16,11 @@ def talk(prompt: str, message: str, messages_history: str):
             temperature = os.getenv('TEMPERATURE'),
         )
 
-        system_prompt = f'O histórico do que foi conversado até agora:{messages_history}\n\n'
+        previous_messages = ''
+        for message_history in messages_history:
+            previous_messages += f'{message_history.get_who()}: {message_history.get_content()}\n'
+
+        system_prompt = f'O histórico do que foi conversado até agora:{previous_messages}\n\n'
 
         system_prompt += prompt
 

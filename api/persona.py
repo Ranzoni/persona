@@ -32,7 +32,7 @@ class PersonasData:
             self.__personas.append(persona)
 
     def get_all(self) -> list[Persona]:
-        return self.__personas.copy()
+        return self.__personas
     
     def get_by_id(self, id: int) -> Persona:
         return next((persona for persona in self.__personas if persona.id() == id), None)
