@@ -1,0 +1,60 @@
+header {
+    margin: auto !important;
+    text-align: center;
+}
+
+.personas-options {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#personas {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px 16px;
+    color: #e6eef8;
+    font-size: 1rem;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-width: 280px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    margin-top: 15px;
+}
+
+#personas:hover {
+    border-color: rgba(79, 70, 229, 0.3);
+    background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)), url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: center, right 12px center;
+    background-repeat: no-repeat, no-repeat;
+    background-size: auto, 16px;
+}
+
+#personas:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+#personas option {
+    background: var(--card);
+    color: #e6eef8;
+    padding: 8px;
+}
+
+#personas option:hover {
+    background: rgba(79, 70, 229, 0.2);
+}
+
+@media (max-width: 640px) {
+    #personas {
+        min-width: 250px;
+        padding: 10px 14px;
+        font-size: 0.95rem;
+    }
+}

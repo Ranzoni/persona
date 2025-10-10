@@ -60,5 +60,19 @@ def get_messages(ip: str, persona_id: int):
 
     return { 'history_messages': messages_dict }
 
+@app.get('/personas')
+def get_personas():
+    personas = __persona_data.get_all()
+
+    personas_dict = [
+        {
+            'id': persona.id(),
+            'name': persona.name()
+        }
+        for persona in personas
+    ]
+
+    return { 'personas': personas_dict }
+
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='debug')

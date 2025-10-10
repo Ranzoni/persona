@@ -1,130 +1,122 @@
- .app{
-    max-width:900px;
-    margin:32px auto;
-    padding:18px;
-    display:flex;
-    flex-direction:column;
-    gap:16px
+header h1 {
+    font-size: 1.15rem;
+    margin: 0
 }
 
- header{
-    display:flex;
-    align-items:center;
-    gap:12px
-}
-
- header h1{
-    font-size:1.15rem;
-    margin:0
-}
-
- header p{
-    margin:0;
-    color:var(--muted);
-    font-size:.9rem
+header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .9rem;
 }
 
 /* Container do chat */
- .chat-card{
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border:1px solid rgba(255,255,255,0.04);
-    border-radius:12px;
-    padding:12px;
-    display:flex;
-    flex-direction:column;
-    height:70vh;
-    min-height:480px
+.chat-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    height: 70vh;
+    min-height: 480px;
 }
 
 /* Área de mensagens */
- .messages{
-    flex:1;
-    overflow:auto;
-    padding:12px;
-    display:flex;
-    flex-direction:column;
-    gap:12px
+.messages {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
- .message{
-    max-width:78%;
+.message {
+    max-width: 78%;
     padding:10px 14px;
     border-radius:12px;
-    line-height:1.4;
-    white-space:pre-wrap
+    line-height: 1.4;
+    white-space: pre-wrap;
 }
 
- .message.bot{
-    align-self:flex-start;
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.03)
+.message.bot {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.03);
+    float: left;
 }
 
- .message.me{
+.message.me {
     text-align: end;
-    background: linear-gradient(90deg, var(--me), #035f5e);
+    background: rgba(255,255,255,0.03);
 	float: right;
 }
 
- .meta{
-    font-size:.75rem;
-    color:var(--muted);
-    margin-top:6px
+.meta {
+    font-size: .75rem;
+    color: var(--muted);
+    margin-top: 6px;
 }
 
 /* Área de input */
- .composer{
-    display:flex;
-    gap:8px;
-    padding-top:8px;
-    border-top:1px dashed rgba(255,255,255,0.02)
+.composer {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255,255,255,0.02);
 }
- textarea{
-    flex:1;
-    min-height:48px;
-    max-height:160px;
-    resize:vertical;
-    padding:10px;
-    border-radius:8px;
-    border:1px solid rgba(255,255,255,0.04);
-    background:transparent;
-    color:inherit;
-    font-size:1rem
+
+textarea {
+    flex: 1;
+    min-height: 48px;
+    max-height: 160px;
+    resize: vertical;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.04);
+    background: transparent;
+    color: inherit;
+    font-size: 1rem;
 }
- button{
-    background:var(--accent);
-    border:none;
-    color:white;
-    padding:10px 14px;
-    border-radius:8px;
-    cursor:pointer
+
+button {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
 }
- button[disabled]{
-    opacity:.5;
-    cursor:default
+
+button[disabled] {
+    opacity: .5;
+    cursor: default;
 }
+
 /* pequenas utilidades */
- .row{
-    display:flex;
-    gap:8px;
-    align-items:center
+.row{
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
- .small{
-    font-size:.85rem;
-    color:var(--muted)
+
+.small{
+    font-size: .85rem;
+    color: var(--muted);
 }
- footer.small{
-    margin-top:6px;
-    color:var(--muted);
-    text-align:right
+
+footer.small{
+    margin-top: 6px;
+    color: var(--muted);
+    text-align: right;
 }
+
 /* Responsividade */
- @media (max-width:640px){
-    .app{
-        margin:12px
+@media (max-width:640px) {
+    .app {
+        margin: 12px 12px 12px 12px;
     }
-    .chat-card{
-        height:72vh;
-        min-height:420px
+    .chat-card {
+        height: 72vh;
+        min-height: 420px;
     }
 }

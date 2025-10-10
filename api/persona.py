@@ -20,19 +20,22 @@ class PersonasData:
     def __init__(self):
         self.__data = []
         self.__personas: list[Persona] = []
+        self.__load_personas()
+        
+    def __load_personas(self):
+        self.__personas = []
 
         with open('characters.json', 'r', encoding='utf-8') as f:
             self.__data = json.load(f)
-            
-        self.__populate_personas()
-        
-    def __populate_personas(self):
+
         for character in self.__data['characters']:
             persona = Persona(character['id'], character['name'], character['prompt'])
             self.__personas.append(persona)
 
     def get_all(self) -> list[Persona]:
+        self.__load_personas()
         return self.__personas
     
     def get_by_id(self, id: int) -> Persona:
+        self.__load_personas()
         return next((persona for persona in self.__personas if persona.id() == id), None)

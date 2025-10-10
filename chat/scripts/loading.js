@@ -1,5 +1,5 @@
 const hiddenClass = 'hidden'
-$loading = document.getElementById('loading');
+const $loading = document.getElementById('loading');
 const $spinner = document.createElement('div');
 $spinner.classList.add('spinner');
 $loading.appendChild($spinner);
