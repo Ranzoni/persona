@@ -2,15 +2,15 @@ import uvicorn
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from brain import talk
 from history_conversation import HistoryConversation
-from mappers import fail_response, messages_history_to_response, persona_message_to_response, personas_list_to_response
+from mappers import fail_response, messages_history_to_response, persona_message_to_response, persona_to_response, personas_list_to_response
 from persona import PersonasData
-from api_models import BaseResponse, TalkRequest
-from security import generate_random_id
+from api_models import BaseResponse, PersonaRequest, TalkRequest
+from security import generate_random_id, validate_secret_key
 
 
 load_dotenv()
@@ -79,6 +79,41 @@ def get_personas():
         return personas_list_to_response(personas)
     except Exception as e:
         return fail_response(f'Fail to get the personas: {e}')
+    
+@app.post('/persona')
+def create_persona(persona_request: PersonaRequest, request: Request) -> BaseResponse:
+    try:
+        secret_key = request.headers.get("X-Secret-Key")
+        if not validate_secret_key(secret_key):
+            return fail_response(f'Access unauthorized')
+
+        persona_created = __persona_data.include_persona(
+            name=persona_request.name,
+            prompt=persona_request.prompt
+        )
+
+        return persona_to_response(persona_created)
+    except Exception as e:
+        return fail_response(f'Fail to create a new persona: {e}')
+    
+@app.put('/persona/{id}')
+def update_persona(id: int, persona_request: PersonaRequest, request: Request) -> BaseResponse:
+    try:
+        secret_key = request.headers.get("X-Secret-Key")
+        if not validate_secret_key(secret_key):
+            return fail_response(f'Access unauthorized')
+        
+        persona_updated = __persona_data.update_persona(
+            id=id,
+            name=persona_request.name,
+            prompt=persona_request.prompt
+        )
+        if not persona_updated:
+            return fail_response('Persona not found.')
+
+        return persona_to_response(persona_updated)
+    except Exception as e:
+        return fail_response(f'Fail to create a new persona: {e}')
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='debug')

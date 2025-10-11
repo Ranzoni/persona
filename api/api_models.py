@@ -8,3 +8,7 @@ class BaseResponse(BaseModel):
 
 class TalkRequest(BaseModel):
     message: str
+
+class PersonaRequest(BaseModel):
+    name: str
+    prompt: str

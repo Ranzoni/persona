@@ -51,3 +51,15 @@ def personas_list_to_response(personas: list[Persona]) -> BaseResponse:
         success=True,
         source=personas_dict
     )
+
+def persona_to_response(persona: Persona) -> BaseResponse:
+    persona_dict = {
+        'id': persona.id(),
+        'name': persona.name(),
+        'prompt': persona.prompt()
+    }
+
+    return __any_to_response(
+        success=True,
+        source=persona_dict
+    )
