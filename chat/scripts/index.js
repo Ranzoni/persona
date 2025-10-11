@@ -11,16 +11,16 @@ window.onload = async function() {
 };
 
 $personasSelect = document.getElementById('personas');
+$startChatButton = document.getElementById('start-chat')
 
 async function loadPersonas() {
     const res = await get('personas');
-    const json = await res.json();
 
-    if (!json.personas) {
+    if (!res) {
         throw new Error('Não foi possível recuperar os personas.');
     }
 
-    json.personas.forEach(persona => {
+    res.forEach(persona => {
         handlePersonaOption(persona.id, persona.name);
     });
 }
@@ -32,3 +32,12 @@ function handlePersonaOption(id, name) {
     $option.className = 'persona-option';
     $personasSelect.appendChild($option);
 }
+
+$startChatButton.addEventListener('click', () => {
+    const personaId = $personasSelect.value;
+    if (!personaId) {
+        return;
+    }
+
+    window.location.href = `./pages/chat.html?id=${personaId}`;
+});

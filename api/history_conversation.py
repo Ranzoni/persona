@@ -15,8 +15,8 @@ class ConversationType:
         return self.__content
     
 class HistoryConversation:
-    def __init__(self, ip: str, persona_id: int):
-        self.__id = f'{persona_id}__{ip}'
+    def __init__(self, id: str, persona_id: int):
+        self.__id = f'{persona_id}__{id}'
         self.__is_connected = False
         self.__repo = Repository()
         self.__human = 'me'

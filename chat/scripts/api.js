@@ -20,6 +20,12 @@ async function request(path, method, headers = undefined, payload = undefined) {
     if (!res.ok) {
         throw new Error('HTTP ' + res.status);
     }
+
+    const json = await res.json()
+
+    if (!json.success) {
+        throw new Error(json.source);
+    }
   
-    return res;
+    return json.source;
 }

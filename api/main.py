@@ -7,8 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from brain import talk
 from history_conversation import HistoryConversation
+from mappers import fail_response, messages_history_to_response, persona_message_to_response, personas_list_to_response
 from persona import PersonasData
-from talk_request import TalkRequest
+from api_models import BaseResponse, TalkRequest
+from security import generate_random_id
 
 
 load_dotenv()
@@ -26,53 +28,57 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-@app.post('/talk/{ip}/{persona_id}')
-def talk_with_persona(ip: str, persona_id: int, talk_request: TalkRequest):
-    persona = __persona_data.get_by_id(persona_id)
+@app.post('/generate-id')
+def generate_id() -> BaseResponse:
+    try:
+        id = generate_random_id()
 
-    history = HistoryConversation(ip, persona.id())
-    messages_history = history.get_history(limit=__limit_messages_to_persona)
+        return BaseResponse(
+            success=True,
+            source=id
+        )
+    except Exception as e:
+        return fail_response(f'Fail to generate the ID: {e}')
 
-    history.append_human_conversation(talk_request.message)
+@app.post('/talk/{id}/{persona_id}')
+def talk_with_persona(id: str, persona_id: int, talk_request: TalkRequest) -> BaseResponse:
+    try:
+        persona = __persona_data.get_by_id(persona_id)
 
-    persona_message = ''
-    for answer in talk(persona.prompt(), talk_request.message, messages_history):
-        persona_message += answer
+        history = HistoryConversation(id, persona.id())
+        messages_history = history.get_history(limit=__limit_messages_to_persona)
 
-    history.append_bot_conversation(persona_message)
+        history.append_human_conversation(talk_request.message)
 
-    return { 'persona_response': persona_message }
+        persona_message = ''
+        for answer in talk(persona.prompt(), talk_request.message, messages_history):
+            persona_message += answer
 
-@app.get('/messages/{ip}/{persona_id}')
-def get_messages(ip: str, persona_id: int):
-    persona = __persona_data.get_by_id(persona_id)
+        history.append_bot_conversation(persona_message)
 
-    history = HistoryConversation(ip, persona.id())
-    messages_history = history.get_history(limit=__limit_messages_to_response)
+        return persona_message_to_response(persona_message)
+    except Exception as e:
+        return fail_response(f'Fail to talk with the persona: {e}')
 
-    messages_dict = [
-        {
-            'who': msg.get_who(),
-            'content': msg.get_content()
-        }
-        for msg in messages_history
-    ]
+@app.get('/messages/{id}/{persona_id}')
+def get_messages(id: str, persona_id: int) -> BaseResponse:
+    try:
+        persona = __persona_data.get_by_id(persona_id)
 
-    return { 'history_messages': messages_dict }
+        history = HistoryConversation(id, persona.id())
+        messages_history = history.get_history(limit=__limit_messages_to_response)
+
+        return messages_history_to_response(messages_history)
+    except Exception as e:
+        return fail_response(f'Fail to get the history messages: {e}')
 
 @app.get('/personas')
 def get_personas():
-    personas = __persona_data.get_all()
-
-    personas_dict = [
-        {
-            'id': persona.id(),
-            'name': persona.name()
-        }
-        for persona in personas
-    ]
-
-    return { 'personas': personas_dict }
+    try:
+        personas = __persona_data.get_all()
+        return personas_list_to_response(personas)
+    except Exception as e:
+        return fail_response(f'Fail to get the personas: {e}')
 
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='debug')

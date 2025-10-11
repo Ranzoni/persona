@@ -1,20 +1,27 @@
-let personaId;
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const personaId = urlParams.get('id'); 
 const conversation = [];
 
-window.onload = function() {
+window.onload = async function() {
+    if (!personaId) {
+        window.location.href = '../index.html';
+        return;
+    }
+
     startLoading();
 
-    handleIp(async (ip) => {
-        try {
-            personaId = 1;
-            saveIp(ip);
-            await loadPreviousMessages();
-        } catch (err) {
-            console.log(err);
-        } finally {
-            endLoading();
+    try {
+        if (!getId()) {
+            await generateId();
         }
-    });
+
+        await loadPreviousMessages();
+    } catch (err) {
+        console.log(err);
+    } finally {
+        endLoading();
+    }
 };
 
 const $messages = document.getElementById('messages');
@@ -91,11 +98,10 @@ async function gePersonaAnswer(personaId, history) {
 
     const payload = { message: history[history.length-1].content };
 
-    const res = await post(`talk/${getIp()}/${personaId}`, payload);
-    const json = await res.json();
+    const res = await post(`talk/${getId()}/${personaId}`, payload);
   
-    if (json.persona_response) {
-        return json.persona_response;
+    if (res) {
+        return res;
     }
 
     throw new Error('Formato de resposta inesperado');
@@ -121,13 +127,21 @@ $input.addEventListener('keydown', (e) => {
 });
 
 async function loadPreviousMessages() {
-    const res = await get(`messages/${getIp()}/${personaId}`);
-    const json = await res.json();
+    const res = await get(`messages/${getId()}/${personaId}`);
 
-    if (!json.history_messages) {
+    if (!res) {
         throw new Error('Formato de resposta inesperado');
     }
 
-    json.history_messages.forEach(message => appendMessage(message.content, message.who));
+    res.forEach(message => appendMessage(message.content, message.who));
 }
 
+async function generateId() {
+    const res = await post('generate-id');
+    
+    if (!res) {
+        throw new Error('ID gerado não é válido');
+    }
+
+    saveId(res);
+}
