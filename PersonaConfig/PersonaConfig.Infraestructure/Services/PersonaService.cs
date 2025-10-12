@@ -33,29 +33,13 @@ namespace PersonaConfig.Infraestructure.Services
         public IEnumerable<Persona> GetAll()
         {
             var response = _httpClient.GetAsync("personas").Result;
-            if (!response.IsSuccessStatusCode)
-                throw new PersonaServiceException("Error fetching personas");
-
-            var content = response.Content.ReadAsStringAsync().Result;
-            if (string.IsNullOrEmpty(content))
-                return [];
-
-            var apiResponse = JsonSerializer.Deserialize<PersonaServiceResponse<IEnumerable<Persona>>>(content);
-            return apiResponse?.Source ?? [];
+            return HandleResponse<IEnumerable<Persona>>(response, "Error fetching personas") ?? [];
         }
 
         public Persona? GetById(int id)
         {
             var response = _httpClient.GetAsync($"persona/{id}").Result;
-            if (!response.IsSuccessStatusCode)
-                throw new PersonaServiceException("Error to get the persona");
-
-            var content = response.Content.ReadAsStringAsync().Result;
-            if (string.IsNullOrEmpty(content))
-                return null;
-
-            var apiResponse = JsonSerializer.Deserialize<PersonaServiceResponse<Persona>>(content);
-            return apiResponse?.Source;
+            return HandleResponse<Persona>(response, "Error to get the persona");
         }
 
         public void Add(Persona persona)
@@ -65,8 +49,7 @@ namespace PersonaConfig.Infraestructure.Services
 
             content.Headers.Add("X-Secret-Key", _secret);
             var response = _httpClient.PostAsync("persona", content).Result;
-            if (!response.IsSuccessStatusCode)
-                throw new PersonaServiceException("Error to add the persona");
+            HandleResponse<Persona>(response, "Error to add the persona");
         }
 
         public void Update(Persona persona)
@@ -76,8 +59,30 @@ namespace PersonaConfig.Infraestructure.Services
 
             content.Headers.Add("X-Secret-Key", _secret);
             var response = _httpClient.PutAsync($"persona/{persona.Id}", content).Result;
+            HandleResponse<Persona>(response, "Error to update the persona");
+        }
+
+
+        public void Delete(int id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"persona/{id}");
+            request.Headers.Add("X-Secret-Key", _secret);
+            var response = _httpClient.SendAsync(request).Result;
+            HandleResponse<string>(response, "Error to delete the persona");
+        }
+
+        private static T? HandleResponse<T>(HttpResponseMessage response, string errorResponseMessage)
+        {
             if (!response.IsSuccessStatusCode)
-                throw new PersonaServiceException("Error to update the persona");
+                throw new PersonaServiceException(errorResponseMessage);
+
+            var content = response.Content.ReadAsStringAsync().Result;
+            var apiResponse = JsonSerializer.Deserialize<PersonaServiceResponse<T>>(content);
+
+            if (apiResponse is null || !apiResponse.Success || apiResponse.Source is null)
+                throw new PersonaServiceException(errorResponseMessage);
+
+            return apiResponse.Source;
         }
     }
 }

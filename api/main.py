@@ -158,5 +158,29 @@ def update_persona(id: int, persona_request: PersonaRequest, request: Request, r
             message=f'Fail to update the persona: {e}'
         )
 
+@app.delete('/persona/{id}')
+def remove_persona(id: int, request: Request, response: Response) -> BaseResponse:
+    try:
+        secret_key = request.headers.get("X-Secret-Key")
+        if not validate_secret_key(secret_key):
+            return __handle_unauthorized(
+                response=response,
+                message=f'Access unauthorized'
+            )
+        
+        persona_removed = __personas_data.remove_persona(id)
+        if not persona_removed:
+            return fail_response('Persona not found.')
+
+        return BaseResponse(
+            success=True,
+            source='The persona was removed!'
+        )
+    except Exception as e:
+        return __handle_bad_request(
+            response=response,
+            message=f'Fail to remove the persona: {e}'
+        )
+    
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='debug')

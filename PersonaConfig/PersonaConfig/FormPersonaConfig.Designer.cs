@@ -33,6 +33,7 @@
             buttonSavePersona = new Button();
             labelPersonaName = new Label();
             labelPersonaPrompt = new Label();
+            buttonDeletePersona = new Button();
             SuspendLayout();
             // 
             // textBoxPersonaName
@@ -78,11 +79,24 @@
             labelPersonaPrompt.TabIndex = 4;
             labelPersonaPrompt.Text = "Prompt";
             // 
+            // buttonDeletePersona
+            // 
+            buttonDeletePersona.BackColor = SystemColors.Control;
+            buttonDeletePersona.Image = Properties.Resources.trash;
+            buttonDeletePersona.Location = new Point(12, 290);
+            buttonDeletePersona.Name = "buttonDeletePersona";
+            buttonDeletePersona.Size = new Size(30, 29);
+            buttonDeletePersona.TabIndex = 5;
+            buttonDeletePersona.UseVisualStyleBackColor = false;
+            buttonDeletePersona.Visible = false;
+            buttonDeletePersona.Click += buttonDeletePersona_Click;
+            // 
             // FormPersonaConfig
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(422, 325);
+            Controls.Add(buttonDeletePersona);
             Controls.Add(labelPersonaPrompt);
             Controls.Add(labelPersonaName);
             Controls.Add(buttonSavePersona);
@@ -90,6 +104,7 @@
             Controls.Add(textBoxPersonaName);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "FormPersonaConfig";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Persona";
             ResumeLayout(false);
             PerformLayout();
@@ -102,5 +117,6 @@
         private Button buttonSavePersona;
         private Label labelPersonaName;
         private Label labelPersonaPrompt;
+        private Button buttonDeletePersona;
     }
 }

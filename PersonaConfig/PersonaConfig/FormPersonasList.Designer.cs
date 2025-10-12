@@ -83,6 +83,7 @@
             Controls.Add(comboBoxPersonas);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "FormPersonasList";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Persona";
             ResumeLayout(false);
             PerformLayout();

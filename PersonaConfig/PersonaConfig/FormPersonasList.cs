@@ -1,4 +1,5 @@
-﻿using PersonaConfig.Infraestructure.Models;
+﻿using PersonaConfig.Infraestructure.Exceptions;
+using PersonaConfig.Infraestructure.Models;
 using PersonaConfig.Infraestructure.Services;
 
 namespace PersonaConfig
@@ -11,6 +12,7 @@ namespace PersonaConfig
         {
             InitializeComponent();
             MaximizeBox = false;
+
 
             _personaService = personaService;
             LoadPersonas();
@@ -34,9 +36,20 @@ namespace PersonaConfig
 
         private void LoadPersonas()
         {
-            comboBoxPersonas.DataSource = _personaService.GetAll();
-            comboBoxPersonas.DisplayMember = "Name";
-            comboBoxPersonas.ValueMember = "Id";
+            try
+            {
+                comboBoxPersonas.DataSource = _personaService.GetAll();
+                comboBoxPersonas.DisplayMember = "Name";
+                comboBoxPersonas.ValueMember = "Id";
+            }
+            catch (PersonaServiceException ex)
+            {
+                MessageBox.Show($"Não foi possível se comunicar com o servidor: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocorreu um erro inesperado: {ex.Message}");
+            }
         }
 
         private void OpenConfigForm(Persona? persona)

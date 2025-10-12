@@ -88,3 +88,25 @@ class PersonasData:
             json.dump(self.__data, f, ensure_ascii=False, indent=2)
     
         return Persona(id=id, name=name, prompt=prompt)
+    
+    def remove_persona(self, id: int) -> bool:
+        with open(self.__file_name, 'r+', encoding='utf-8') as f:
+            self.__data = json.load(f)
+            
+            persona_index = None
+            for i, character in enumerate(self.__data['characters']):
+                if character['id'] == id:
+                    persona_index = i
+                    break
+            
+            if persona_index is None:
+                return False
+            
+            del self.__data['characters'][persona_index]
+            
+            f.seek(0)
+            f.truncate()
+            json.dump(self.__data, f, ensure_ascii=False, indent=2)
+
+        return True
+    

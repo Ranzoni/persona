@@ -1,6 +1,6 @@
 ﻿namespace PersonaConfig.Infraestructure.Exceptions
 {
-    internal class PersonaServiceException(string message) : Exception(message)
+    public class PersonaServiceException(string message) : Exception(message)
     {
     }
 }
