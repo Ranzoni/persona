@@ -100,6 +100,17 @@ def get_personas(response: Response):
             message=f'Fail to get the personas: {e}'
         )
     
+@app.get('/persona/{id}')
+def get_personas(id: int, response: Response):
+    try:
+        persona = __personas_data.get_by_id(id)
+        return persona_to_response(persona)
+    except Exception as e:
+        return __handle_bad_request(
+            response=response,
+            message=f'Fail to get the personas: {e}'
+        )
+
 @app.post('/persona')
 def create_persona(persona_request: PersonaRequest, request: Request, response: Response) -> BaseResponse:
     try:
@@ -127,7 +138,7 @@ def update_persona(id: int, persona_request: PersonaRequest, request: Request, r
     try:
         secret_key = request.headers.get("X-Secret-Key")
         if not validate_secret_key(secret_key):
-            __handle_unauthorized(
+            return __handle_unauthorized(
                 response=response,
                 message=f'Access unauthorized'
             )
