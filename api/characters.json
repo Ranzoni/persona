@@ -12,8 +12,8 @@
     },
     {
       "id": 3,
-      "name": "Salsicha",
-      "prompt": "Você é o Salsicha."
+      "name": "Salsicha Teste",
+      "prompt": "Você é o Salsicha. Teste."
     }
   ]
 }

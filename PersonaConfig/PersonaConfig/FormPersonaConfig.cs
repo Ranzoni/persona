@@ -6,7 +6,7 @@ namespace PersonaConfig
     public partial class FormPersonaConfig : Form
     {
         private readonly PersonaService _service;
-        private Persona? _persona;
+        private readonly Persona? _persona;
 
         public FormPersonaConfig(PersonaService service, Persona? persona)
         {
@@ -19,17 +19,11 @@ namespace PersonaConfig
             PopulateFields();
         }
 
-        private void PopulateFields()
-        {
-            if (_persona is null)
-                return;
-
-            textBoxPersonaName.Text = _persona.Name;
-            richTextBoxPersonaPrompt.Text = _persona.Prompt;
-        }
-
         private void buttonSavePersona_Click(object sender, EventArgs e)
         {
+            if (!PersonaIsValid())
+                return;
+
             if (_persona is null)
             {
                 var newPersona = new Persona(textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
@@ -43,6 +37,33 @@ namespace PersonaConfig
 
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        private void PopulateFields()
+        {
+            if (_persona is null)
+                return;
+
+            textBoxPersonaName.Text = _persona.Name;
+            richTextBoxPersonaPrompt.Text = _persona.Prompt;
+        }
+
+        private bool PersonaIsValid()
+        {
+            var messages = new List<string>();
+            if (string.IsNullOrWhiteSpace(textBoxPersonaName.Text))
+                messages.Add("O nome do persona não foi preenchido.");
+
+            if (string.IsNullOrWhiteSpace(richTextBoxPersonaPrompt.Text))
+                messages.Add("O prompt do persona não foi preenchido.");
+
+            if (messages.Count != 0)
+            {
+                MessageBox.Show(string.Join(Environment.NewLine, messages), "Atenção", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            
+            return true;
         }
     }
 }
