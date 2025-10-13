@@ -16,6 +16,7 @@ window.onload = async function() {
             await generateId();
         }
 
+        await loadPersonaData(personaId);
         await loadPreviousMessages();
     } catch (err) {
         console.log(err);
@@ -28,6 +29,7 @@ const $messages = document.getElementById('messages');
 const $input = document.getElementById('input');
 const $send = document.getElementById('send');
 const $clear = document.getElementById('clear');
+const $personaName = document.getElementById('persona-name');
 
 function scrollToBottom() {
     $messages.scrollTop = $messages.scrollHeight;
@@ -125,6 +127,16 @@ $input.addEventListener('keydown', (e) => {
         sendMessage();
     }
 });
+
+async function loadPersonaData(id) {
+    const res = await get(`persona/${id}`);
+
+    if (!res) {
+        throw new Error('Falha ao recuperar os dados do persona.');
+    }
+
+    $personaName.textContent = res.name;
+}
 
 async function loadPreviousMessages() {
     const res = await get(`messages/${getId()}/${personaId}`);

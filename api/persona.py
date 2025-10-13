@@ -37,7 +37,7 @@ class PersonasData:
 
     def get_all(self) -> list[Persona]:
         self.__load_personas()
-        return self.__personas
+        return sorted(self.__personas, key=lambda persona: persona.name())
     
     def get_by_id(self, id: int) -> Persona:
         self.__load_personas()
