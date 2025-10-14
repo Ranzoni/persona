@@ -68,3 +68,8 @@ class HistoryConversation:
 
         return [self.__get_json_as_conversation(json) for json in json_values]
     
+    def clear_history(self):
+        self.__connect()
+        self.__repo.remove(
+            key=self.__id,
+        )

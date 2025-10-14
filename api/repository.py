@@ -26,3 +26,7 @@ class Repository:
         else:
             raw_data = self.__r.lrange(key, 0, -1)
         return [item.decode('utf-8') for item in raw_data]
+
+    def remove(self, key: str):
+        self.__r.delete(key)
+        

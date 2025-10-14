@@ -119,15 +119,6 @@ async function* gePersonaAnswer(personaId, history) {
     for await (const chunk of res) {
         yield chunk;
     }
-    // let chunk = res.next();
-    // while (true) {
-    //     if (chunk.done) {
-    //         return;
-    //     }
-
-    //     yield chunk.value;
-    //     chunk = res.next();
-    // }
 }
 
 function handleFailToCommunicateWithPersona() {
@@ -135,11 +126,13 @@ function handleFailToCommunicateWithPersona() {
 }
 
 $send.addEventListener('click', sendMessage);
-$clear.addEventListener('click', () => {
-    $messages.innerHTML='';
-    conversation.length=0;
-    $input.value='';
+$clear.addEventListener('click', async () => {
+    $messages.innerHTML= '';
+    conversation.length= 0;
+    $input.value= '';
     $input.focus();
+
+    await remove(`messages/${getId()}/${personaId}`);
 });
 
 $input.addEventListener('keydown', (e) => {

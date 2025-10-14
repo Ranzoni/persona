@@ -10,6 +10,11 @@ async function get(path) {
     return res;
 }
 
+async function remove(path) {
+    const res = await request(path, 'DELETE');
+    return res;
+}
+
 async function request(path, method, headers = undefined, payload = undefined) {
     const res = await fetch(`${API_URL}/${path}`, {
         method: method,

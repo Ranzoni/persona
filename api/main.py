@@ -96,6 +96,23 @@ def get_messages(id: str, persona_id: int, response: Response) -> BaseResponse:
             message=f'Fail to get the history messages: {e}'
         )
 
+@app.delete('/messages/{id}/{persona_id}')
+def remove_messages(id: str, persona_id: int, response: Response) -> BaseResponse:
+    try:
+        history = HistoryConversation(id, persona_id)
+
+        history.clear_history()
+
+        return BaseResponse(
+            success=True,
+            source={'Messages cleared.'}
+        )
+    except Exception as e:
+        return __handle_bad_request(
+            response=response,
+            message=f'Fail to remove the messages: {e}'
+        )
+
 @app.get('/personas')
 def get_personas(response: Response):
     try:
