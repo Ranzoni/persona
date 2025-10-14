@@ -39,7 +39,15 @@ function formatTime(date = new Date()){
     return date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
-function appendMessage(text, who = 'bot', meta = '') {
+function appendMessage(text, who = 'bot', meta = '', appendLastMessage = false) {
+    if (appendLastMessage) {
+        const messages = document.querySelectorAll(`.${who}`);
+        const lastMessage = messages[messages.length - 1];
+
+        lastMessage.textContent += text;
+        return;
+    }
+
     const el = document.createElement('div');
     el.className = 'message ' + (who === 'me' ? 'me' : 'bot');
     el.innerText = text;
@@ -71,9 +79,15 @@ async function sendMessage(){
     setUIBusy(true);
 
     try {
-        const reply = await gePersonaAnswer(personaId, conversation);
-        conversation.push({role:'assistant', content:reply});
-        appendMessage(reply, 'bot');
+        let answerStarted = false;
+        const conversationObj = {role: 'assistant', content: ''};
+        for await (const chunk of gePersonaAnswer(personaId, conversation)) {
+            conversationObj.content += chunk;
+            appendMessage(chunk, 'bot', '', answerStarted);
+            answerStarted = true;
+        }
+        
+        conversation.push(conversationObj);
     } catch(err) {
         console.error(err);
         appendMessage('Erro: não foi possível obter resposta do servidor.', 'bot', formatTime());
@@ -93,20 +107,27 @@ function setUIBusy(isBusy){
     }
 }
 
-async function gePersonaAnswer(personaId, history) {
+async function* gePersonaAnswer(personaId, history) {
     if (!API_URL) {
-	      return handleFailToCommunicateWithPersona();
+	      yield handleFailToCommunicateWithPersona();
+        return;
     }
 
     const payload = { message: history[history.length-1].content };
 
-    const res = await post(`talk/${getId()}/${personaId}`, payload);
-  
-    if (res) {
-        return res;
+    const res = postStream(`talk/${getId()}/${personaId}`, payload);
+    for await (const chunk of res) {
+        yield chunk;
     }
+    // let chunk = res.next();
+    // while (true) {
+    //     if (chunk.done) {
+    //         return;
+    //     }
 
-    throw new Error('Formato de resposta inesperado');
+    //     yield chunk.value;
+    //     chunk = res.next();
+    // }
 }
 
 function handleFailToCommunicateWithPersona() {

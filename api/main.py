@@ -1,3 +1,4 @@
+from fastapi.responses import StreamingResponse
 import uvicorn
 import os
 
@@ -61,13 +62,19 @@ def talk_with_persona(id: str, persona_id: int, talk_request: TalkRequest, respo
 
         history.append_human_conversation(talk_request.message)
 
-        persona_message = ''
-        for answer in talk(persona.prompt(), talk_request.message, messages_history):
-            persona_message += answer
+        def get_ai_response():
+            persona_message = ''
+            for answer in talk(persona.prompt(), talk_request.message, messages_history):
+                persona_message += answer
+                yield answer
 
-        history.append_bot_conversation(persona_message)
+            history.append_bot_conversation(persona_message)
 
-        return persona_message_to_response(persona_message)
+        return StreamingResponse(
+            get_ai_response(),
+            media_type='text/pain',
+            status_code=200
+        )
     except Exception as e:
         return __handle_bad_request(
             response=response,
@@ -181,6 +188,6 @@ def remove_persona(id: int, request: Request, response: Response) -> BaseRespons
             response=response,
             message=f'Fail to remove the persona: {e}'
         )
-    
+
 if __name__ == '__main__':
     uvicorn.run('main:app', host='127.0.0.1', port=8000, reload=True, log_level='debug')

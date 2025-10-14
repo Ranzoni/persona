@@ -29,3 +29,30 @@ async function request(path, method, headers = undefined, payload = undefined) {
   
     return json.source;
 }
+
+async function* postStream(path, payload) {
+    const res = await fetch(`${API_URL}/${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+        throw new Error('HTTP ' + res.status);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+            console.log("Stream finished.");
+            break;
+        }
+
+        const chunkText = decoder.decode(value, { stream: true });
+        yield chunkText;
+    }
+}
