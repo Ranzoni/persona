@@ -9,10 +9,8 @@ header p {
     font-size: .9rem;
 }
 
-/* Container do chat */
 #persona-icon {
-    width: 80px;
-    height: 80px;
+    width: 115px;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--accent), #06b6d4);
     display: flex;
@@ -27,6 +25,17 @@ header p {
     border-radius: 10px;
 }
 
+.persona-name {
+    width: 100%;
+}
+
+#close-chat {
+    border-radius: 35px !important;
+    width: 36px;
+    height: 38px;
+}
+
+/* Container do chat */
 .chat-card {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid rgba(255,255,255,0.04);
@@ -107,6 +116,11 @@ button {
 button[disabled] {
     opacity: .5;
     cursor: default;
+}
+
+#clear {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.04);
 }
 
 /* pequenas utilidades */

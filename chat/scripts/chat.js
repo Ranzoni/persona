@@ -31,6 +31,7 @@ const $send = document.getElementById('send');
 const $clear = document.getElementById('clear');
 const $personaName = document.getElementById('persona-name');
 const $personaImage = document.getElementById('persona-image');
+const $closeChat = document.getElementById('close-chat');
 
 function scrollToBottom() {
     $messages.scrollTop = $messages.scrollHeight;
@@ -173,3 +174,7 @@ async function generateId() {
 
     saveId(res);
 }
+
+$closeChat.addEventListener('click', (e) => {
+   window.location.href = '../index.html'; 
+});

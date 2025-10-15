@@ -16,9 +16,14 @@
       <div id="persona-icon">
         <img id="persona-image" />
       </div>
-      <div>
+
+      <div class="persona-name">
         <h1 id="persona-name"></h1>
         <p>Converse com o bot. Pressione <kbd>Enter</kbd> para enviar (Shift+Enter para nova linha).</p>
+      </div>
+
+      <div>
+        <button id="close-chat" href="../index.html">X</button>
       </div>
     </header>
 
@@ -29,7 +34,7 @@
         <textarea id="input" placeholder="Digite sua mensagem aqui..." aria-label="Mensagem" ></textarea>
         <div style="display:flex;flex-direction:column;gap:8px">
           <button id="send">Enviar</button>
-          <button id="clear" title="Limpar conversa" style="background:transparent;border:1px solid rgba(255,255,255,0.04);">Limpar</button>
+          <button id="clear" title="Limpar conversa">Limpar</button>
         </div>
       </div>
     </main>
