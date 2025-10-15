@@ -2,10 +2,11 @@ import json
 
 
 class Persona:
-    def __init__(self, id, name, prompt):
+    def __init__(self, id, name, prompt, image = None):
         self.__id = id
         self.__name = name
         self.__prompt = prompt
+        self.__image = image
 
     def id(self) -> int:
         return self.__id
@@ -15,6 +16,9 @@ class Persona:
     
     def prompt(self) -> str:
         return self.__prompt
+    
+    def image(self) -> str | None:
+        return self.__image
 
 class PersonasData:
     def __init__(self):
@@ -29,7 +33,7 @@ class PersonasData:
             self.__data = json.load(f)
 
         for character in self.__data['characters']:
-            persona = Persona(character['id'], character['name'], character['prompt'])
+            persona = Persona(character['id'], character['name'], character['prompt'], character['image'])
             self.__personas.append(persona)
 
     def __next_id(self) -> int:
@@ -64,7 +68,7 @@ class PersonasData:
             name=new_persona_dict['name'],
             prompt=new_persona_dict['prompt'])
     
-    def update_persona(self, id: int, name: str, prompt: str):
+    def update_persona(self, id: int, name: str, prompt: str, image: str):
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
             self.__data = json.load(f)
             
@@ -80,7 +84,8 @@ class PersonasData:
             self.__data['characters'][persona_index] = {
                 "id": id,
                 "name": name,
-                "prompt": prompt
+                "prompt": prompt,
+                "image": image
             }
             
             f.seek(0)

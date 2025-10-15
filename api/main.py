@@ -1,14 +1,16 @@
+import shutil
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, File, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from brain import talk
 from history_conversation import HistoryConversation
-from mappers import fail_response, messages_history_to_response, persona_message_to_response, persona_to_response, personas_list_to_response
+from mappers import fail_response, messages_history_to_response, persona_to_response, personas_list_to_response
 from persona import PersonasData
 from api_models import BaseResponse, PersonaRequest, TalkRequest
 from security import generate_random_id, validate_secret_key
@@ -28,6 +30,11 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+UPLOAD_DIR = 'images'
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+app.mount('/images', StaticFiles(directory=UPLOAD_DIR), name='images')
 
 def __handle_unauthorized(response: Response, message: str) -> BaseResponse:
     response.status_code = 401
@@ -125,10 +132,13 @@ def get_personas(response: Response):
         )
     
 @app.get('/persona/{id}')
-def get_personas(id: int, response: Response):
+def get_personas(id: int, response: Response, request: Request):
     try:
         persona = __personas_data.get_by_id(id)
-        return persona_to_response(persona)
+        return persona_to_response(
+            persona,
+            image_path=str(request.base_url) + 'images'
+        )
     except Exception as e:
         return __handle_bad_request(
             response=response,
@@ -144,6 +154,8 @@ def create_persona(persona_request: PersonaRequest, request: Request, response: 
                 response=response,
                 message=f'Access unauthorized'
             )
+
+        # await upload(file)
 
         persona_created = __personas_data.include_persona(
             name=persona_request.name,
@@ -204,6 +216,23 @@ def remove_persona(id: int, request: Request, response: Response) -> BaseRespons
         return __handle_bad_request(
             response=response,
             message=f'Fail to remove the persona: {e}'
+        )
+
+@app.post("/persona/upload")
+async def upload_image(response: Response, file: UploadFile = File(...)):
+    try:
+        file_path = os.path.join(UPLOAD_DIR, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        return BaseResponse(
+            success=True,
+            source='The persona image was uploaded.'
+        )
+    except Exception as e:
+        return __handle_bad_request(
+            response=response,
+            message=f'Fail to upload the persona image: {e}'
         )
 
 if __name__ == '__main__':

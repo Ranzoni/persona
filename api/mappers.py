@@ -52,11 +52,12 @@ def personas_list_to_response(personas: list[Persona]) -> BaseResponse:
         source=personas_dict
     )
 
-def persona_to_response(persona: Persona) -> BaseResponse:
+def persona_to_response(persona: Persona, image_path: str) -> BaseResponse:
     persona_dict = {
         'id': persona.id(),
         'name': persona.name(),
-        'prompt': persona.prompt()
+        'prompt': persona.prompt(),
+        'image': f'{image_path}/{persona.image()}'
     }
 
     return __any_to_response(

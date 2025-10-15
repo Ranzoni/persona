@@ -10,6 +10,23 @@ header p {
 }
 
 /* Container do chat */
+#persona-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), #06b6d4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight:700;
+}
+
+#persona-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 10px;
+}
+
 .chat-card {
     background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
     border: 1px solid rgba(255,255,255,0.04);

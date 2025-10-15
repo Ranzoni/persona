@@ -30,6 +30,7 @@ const $input = document.getElementById('input');
 const $send = document.getElementById('send');
 const $clear = document.getElementById('clear');
 const $personaName = document.getElementById('persona-name');
+const $personaImage = document.getElementById('persona-image');
 
 function scrollToBottom() {
     $messages.scrollTop = $messages.scrollHeight;
@@ -150,6 +151,7 @@ async function loadPersonaData(id) {
     }
 
     $personaName.textContent = res.name;
+    $personaImage.src = res.image;
 }
 
 async function loadPreviousMessages() {
