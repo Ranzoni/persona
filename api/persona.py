@@ -70,7 +70,7 @@ class PersonasData:
             prompt=new_persona_dict['prompt']
         )
     
-    def update_persona(self, id: int, name: str, prompt: str, image: str):
+    def update_persona(self, id: int, name: str, prompt: str, image: str = None):
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
             self.__data = json.load(f)
             
@@ -87,7 +87,7 @@ class PersonasData:
                 "id": id,
                 "name": name,
                 "prompt": prompt,
-                "image": image
+                "image": image if image else character['image']
             }
             
             f.seek(0)

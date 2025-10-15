@@ -188,7 +188,10 @@ def update_persona(id: int, persona_request: PersonaRequest, request: Request, r
         if not persona_updated:
             return fail_response('Persona not found.')
 
-        return persona_to_response(persona_updated)
+        return persona_to_response(
+            persona_updated,
+            image_path=UPLOAD_DIR
+        )
     except Exception as e:
         return __handle_bad_request(
             response=response,
