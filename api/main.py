@@ -155,14 +155,15 @@ def create_persona(persona_request: PersonaRequest, request: Request, response: 
                 message=f'Access unauthorized'
             )
 
-        # await upload(file)
-
         persona_created = __personas_data.include_persona(
             name=persona_request.name,
             prompt=persona_request.prompt
         )
 
-        return persona_to_response(persona_created)
+        return persona_to_response(
+            persona_created,
+            image_path=UPLOAD_DIR
+        )
     except Exception as e:
         return __handle_bad_request(
             response=response,
@@ -218,12 +219,30 @@ def remove_persona(id: int, request: Request, response: Response) -> BaseRespons
             message=f'Fail to remove the persona: {e}'
         )
 
-@app.post("/persona/upload")
-async def upload_image(response: Response, file: UploadFile = File(...)):
+@app.post("/persona/{id}/upload")
+async def upload_image(id: int, request: Request, response: Response, file: UploadFile = File(...)):
     try:
+        secret_key = request.headers.get("X-Secret-Key")
+        if not validate_secret_key(secret_key):
+            return __handle_unauthorized(
+                response=response,
+                message=f'Access unauthorized'
+            )
+        
         file_path = os.path.join(UPLOAD_DIR, file.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
+
+        persona = __personas_data.get_by_id(id)
+        if not persona:
+            raise Exception('Persona not found.')
+        
+        __personas_data.update_persona(
+            id=id,
+            name=persona.name(),
+            prompt=persona.prompt(),
+            image=file.filename
+        )
 
         return BaseResponse(
             success=True,

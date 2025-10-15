@@ -51,7 +51,8 @@ class PersonasData:
         new_persona_dict = {
             "id": self.__next_id(),
             "name": name,
-            "prompt": prompt
+            "prompt": prompt,
+            "image": ''
         }
 
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
@@ -66,7 +67,8 @@ class PersonasData:
         return Persona(
             id=new_persona_dict['id'],
             name=new_persona_dict['name'],
-            prompt=new_persona_dict['prompt'])
+            prompt=new_persona_dict['prompt']
+        )
     
     def update_persona(self, id: int, name: str, prompt: str, image: str):
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
