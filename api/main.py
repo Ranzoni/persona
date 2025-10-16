@@ -1,3 +1,5 @@
+from functools import wraps
+import inspect
 import shutil
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -5,15 +7,15 @@ import uvicorn
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Request, Response, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from brain import talk
 from history_conversation import HistoryConversation
-from mappers import fail_response, messages_history_to_response, persona_to_response, personas_list_to_response
+from mappers import fail_response, id_generated_to_response, messages_history_to_response, persona_to_response, personas_list_to_response, session_id_to_id_generated
 from persona import PersonasData
 from api_models import BaseResponse, PersonaRequest, TalkRequest
-from security import generate_random_id, validate_secret_key
+from security import IdGenerated, generate_random_id, validate_secret_key
 
 
 load_dotenv()
@@ -36,6 +38,57 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.mount('/images', StaticFiles(directory=UPLOAD_DIR), name='images')
 
+def session_validator(func):
+    @wraps(func)
+    def validate_session(*args, **kwargs):
+        request = None
+        
+        sig = inspect.signature(func)
+        bound_args = sig.bind(*args, **kwargs)
+        bound_args.apply_defaults()
+        
+        for param_name, param_value in bound_args.arguments.items():
+            if isinstance(param_value, Request):
+                request = param_value
+                break
+        
+        if not request:
+            raise HTTPException(status_code=500, detail="Request not found")
+        
+        __handle_generated_id(request)
+        
+        try:
+            if inspect.iscoroutinefunction(func):
+                return func(*args, **kwargs)
+            else:
+                result = func(*args, **kwargs)
+                return result
+        except Exception as e:
+            print(f"Error in {func.__name__}: {e}")
+            raise
+    
+    return validate_session
+
+def __handle_generated_id(request: Request) -> IdGenerated:
+    if not request:
+        raise HTTPException(status_code=500, detail="Request not found")
+    
+    session_id_header = request.headers.get("X-Session-ID")
+    if not session_id_header:
+        raise HTTPException(status_code=401, detail="X-Session-ID header required")
+    
+    try:
+        id_generated = session_id_to_id_generated(session_id_header)
+
+        if id_generated.is_session_expired():
+            raise HTTPException(status_code=401, detail="Session expired")
+        
+        return id_generated
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid session ID: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Session validation error: {str(e)}")
+
 def __handle_unauthorized(response: Response, message: str) -> BaseResponse:
     response.status_code = 401
     return fail_response(message)
@@ -47,24 +100,24 @@ def __handle_bad_request(response: Response, message: str) -> BaseResponse:
 @app.post('/generate-id')
 def generate_id(response: Response) -> BaseResponse:
     try:
-        id = generate_random_id()
+        id_generated = generate_random_id()
 
-        return BaseResponse(
-            success=True,
-            source=id
-        )
+        return id_generated_to_response(id_generated)
     except Exception as e:
         return __handle_bad_request(
             response=response,
             message=f'Fail to generate the ID: {e}'
         )
 
-@app.post('/talk/{id}/{persona_id}')
-def talk_with_persona(id: str, persona_id: int, talk_request: TalkRequest, response: Response) -> BaseResponse:
+@app.post('/talk/{persona_id}')
+@session_validator
+def talk_with_persona(persona_id: int, talk_request: TalkRequest, response: Response, request: Request) -> BaseResponse:
     try:
+        id_generated = __handle_generated_id(request)
+
         persona = __personas_data.get_by_id(persona_id)
 
-        history = HistoryConversation(id, persona.id())
+        history = HistoryConversation(id_generated.id(), persona.id())
         messages_history = history.get_history(limit=__limit_messages_to_persona)
 
         history.append_human_conversation(talk_request.message)
@@ -88,12 +141,14 @@ def talk_with_persona(id: str, persona_id: int, talk_request: TalkRequest, respo
             message=f'Fail to talk with the persona: {e}'
         )
 
-@app.get('/messages/{id}/{persona_id}')
-def get_messages(id: str, persona_id: int, response: Response) -> BaseResponse:
+@app.get('/messages/{persona_id}')
+@session_validator
+def get_messages(persona_id: int, request: Request, response: Response) -> BaseResponse:
     try:
+        id_generated = __handle_generated_id(request)
         persona = __personas_data.get_by_id(persona_id)
 
-        history = HistoryConversation(id, persona.id())
+        history = HistoryConversation(id_generated.id(), persona.id())
         messages_history = history.get_history(limit=__limit_messages_to_response)
 
         return messages_history_to_response(messages_history)
@@ -103,10 +158,12 @@ def get_messages(id: str, persona_id: int, response: Response) -> BaseResponse:
             message=f'Fail to get the history messages: {e}'
         )
 
-@app.delete('/messages/{id}/{persona_id}')
-def remove_messages(id: str, persona_id: int, response: Response) -> BaseResponse:
+@app.delete('/messages/{persona_id}')
+@session_validator
+def remove_messages(persona_id: int, request: Request, response: Response) -> BaseResponse:
     try:
-        history = HistoryConversation(id, persona_id)
+        id_generated = __handle_generated_id(request)
+        history = HistoryConversation(id_generated.id(), persona_id)
 
         history.clear_history()
 

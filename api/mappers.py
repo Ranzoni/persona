@@ -1,8 +1,10 @@
 from typing import Any
+import uuid
 
 from history_conversation import ConversationType
 from api_models import BaseResponse
 from persona import Persona
+from security import IdGenerated
 
 
 def __any_to_response(success: bool, source: Any) -> BaseResponse:
@@ -64,3 +66,28 @@ def persona_to_response(persona: Persona, image_path: str) -> BaseResponse:
         success=True,
         source=persona_dict
     )
+
+def id_generated_to_response(id_generated: IdGenerated) -> BaseResponse:
+    id_generated_dict = {
+        'id': id_generated.id(),
+        'expiresIn': id_generated.expires_in(),
+    }
+
+    return __any_to_response(
+        success=True,
+        source=id_generated_dict
+    )
+
+def session_id_to_id_generated(session_id_str: str) -> IdGenerated:
+    try:
+        parts = session_id_str.split(':')
+        if len(parts) != 2:
+            raise ValueError("Invalid session ID format")
+        
+        uuid_str, expires_str = parts
+        session_uuid = uuid.UUID(uuid_str)
+        expires_timestamp = int(expires_str)
+        
+        return IdGenerated(session_uuid, expires_timestamp)
+    except (ValueError, AttributeError) as e:
+        raise ValueError(f"Invalid session ID: {e}")
