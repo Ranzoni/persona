@@ -1,29 +1,46 @@
 const API_URL = 'http://127.0.0.1:8000';
+const sessionIdHeader = 'X-Session-ID';
 
-async function post(path, payload) {
-    const res = await request(path, 'POST', { 'Content-Type': 'application/json' }, JSON.stringify(payload));
+function buildHeaders(value, sendSession) {
+    let headers = value;
+    if (sendSession) {
+        if (!headers) {
+            headers = { };
+        }
+        headers[sessionIdHeader] = getSessionId();
+    }
+
+    return headers;
+}
+
+async function post(path, payload, sendSession = false) {
+    const headers = buildHeaders({ 'Content-Type': 'application/json' }, sendSession);
+    const res = await request(path, 'POST', headers, JSON.stringify(payload));
     return res;
 }
 
-async function get(path) {
-    const res = await request(path, 'GET');
+async function get(path, sendSession = false) {
+    const headers = buildHeaders(undefined, sendSession);
+    const res = await request(path, 'GET', headers);
     return res;
 }
 
 async function remove(path) {
-    const res = await request(path, 'DELETE');
+    const headers = buildHeaders(undefined, sendSession);
+    const ers = await request(path, 'DELETE', headers);
     return res;
 }
 
-async function request(path, method, headers = undefined, payload = undefined) {
+async function request(path, method, headers, payload = undefined) {
     const res = await fetch(`${API_URL}/${path}`, {
         method: method,
         headers: headers,
         body: payload
     });
 
-    if (!res.ok) {
-        throw new Error('HTTP ' + res.status);
+    const successRequest = await handleFailRequest(res, path, method, headers, payload);
+    if (!successRequest) {
+        return;
     }
 
     const json = await res.json()
@@ -38,14 +55,15 @@ async function request(path, method, headers = undefined, payload = undefined) {
 async function* postStream(path, payload) {
     const res = await fetch(`${API_URL}/${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: buildHeaders({ 'Content-Type': 'application/json'}, true),
         body: JSON.stringify(payload)
     });
 
-    if (!res.ok) {
-        throw new Error('HTTP ' + res.status);
+    const successRequest = await handleFailRequest(res, path, 'POST', buildHeaders({ 'Content-Type': 'application/json'}, true), payload);
+    if (!successRequest) {
+        return;
     }
-
+    
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
 
@@ -60,4 +78,28 @@ async function* postStream(path, payload) {
         const chunkText = decoder.decode(value, { stream: true });
         yield chunkText;
     }
+}
+
+async function handleFailRequest(res, path, method, headers, payload = undefined) {
+    if (!res.ok) {
+        if (res.status === 401) {
+            await generateId();
+            await request(path, method, headers, payload);
+            return false;
+        }
+
+        throw new Error('HTTP ' + res.status);
+    }
+
+    return true;
+}
+
+async function generateId() {
+    const res = await post('generate-id');
+    
+    if (!res) {
+        throw new Error('ID gerado não é válido');
+    }
+
+    saveSessionId(res.id, res.expiresIn);
 }

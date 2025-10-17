@@ -78,15 +78,15 @@ def id_generated_to_response(id_generated: IdGenerated) -> BaseResponse:
         source=id_generated_dict
     )
 
-def session_id_to_id_generated(session_id_str: str) -> IdGenerated:
+def session_id_to_id_generated(session_id: str, expires_in: int) -> IdGenerated:
     try:
-        parts = session_id_str.split(':')
-        if len(parts) != 2:
-            raise ValueError("Invalid session ID format")
+        # parts = session_id_str.split(':')
+        # if len(parts) != 2:
+        #     raise ValueError("Invalid session ID format")
         
-        uuid_str, expires_str = parts
+        uuid_str = session_id
         session_uuid = uuid.UUID(uuid_str)
-        expires_timestamp = int(expires_str)
+        expires_timestamp = expires_in
         
         return IdGenerated(session_uuid, expires_timestamp)
     except (ValueError, AttributeError) as e:

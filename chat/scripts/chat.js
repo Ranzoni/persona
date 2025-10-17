@@ -12,7 +12,7 @@ window.onload = async function() {
     startLoading();
 
     try {
-        if (!getId()) {
+        if (!getSessionId()) {
             await generateId();
         }
 
@@ -68,7 +68,7 @@ function appendMessage(text, who = 'bot', meta = '', appendLastMessage = false) 
     return el;
 }
 
-async function sendMessage(){
+async function sendMessage() {
     const text = $input.value.trim();
     if (!text) {
       return;
@@ -117,7 +117,7 @@ async function* gePersonaAnswer(personaId, history) {
 
     const payload = { message: history[history.length-1].content };
 
-    const res = postStream(`talk/${getId()}/${personaId}`, payload);
+    const res = postStream(`talk/${personaId}`, payload);
     for await (const chunk of res) {
         yield chunk;
     }
@@ -134,7 +134,7 @@ $clear.addEventListener('click', async () => {
     $input.value= '';
     $input.focus();
 
-    await remove(`messages/${getId()}/${personaId}`);
+    await remove(`messages/${getSessionId()}/${personaId}`);
 });
 
 $input.addEventListener('keydown', (e) => {
@@ -156,23 +156,13 @@ async function loadPersonaData(id) {
 }
 
 async function loadPreviousMessages() {
-    const res = await get(`messages/${getId()}/${personaId}`);
+    const res = await get(`messages/${personaId}`, true);
 
     if (!res) {
         throw new Error('Formato de resposta inesperado');
     }
 
     res.forEach(message => appendMessage(message.content, message.who));
-}
-
-async function generateId() {
-    const res = await post('generate-id');
-    
-    if (!res) {
-        throw new Error('ID gerado não é válido');
-    }
-
-    saveId(res);
 }
 
 $closeChat.addEventListener('click', (e) => {

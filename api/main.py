@@ -15,7 +15,7 @@ from history_conversation import HistoryConversation
 from mappers import fail_response, id_generated_to_response, messages_history_to_response, persona_to_response, personas_list_to_response, session_id_to_id_generated
 from persona import PersonasData
 from api_models import BaseResponse, PersonaRequest, TalkRequest
-from security import IdGenerated, generate_random_id, validate_secret_key
+from security import IdGenerated, generate_random_id, get_generated_id, validate_secret_key
 
 
 load_dotenv()
@@ -33,6 +33,15 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
+__session_id: str | None = None
+
+@app.middleware("http")
+async def clear_global_variables(request: Request, call_next):
+    global __session_id
+    __session_id = None
+    response = await call_next(request)
+    return response
+
 UPLOAD_DIR = 'images'
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -47,7 +56,7 @@ def session_validator(func):
         bound_args = sig.bind(*args, **kwargs)
         bound_args.apply_defaults()
         
-        for param_name, param_value in bound_args.arguments.items():
+        for _, param_value in bound_args.arguments.items():
             if isinstance(param_value, Request):
                 request = param_value
                 break
@@ -55,7 +64,9 @@ def session_validator(func):
         if not request:
             raise HTTPException(status_code=500, detail="Request not found")
         
-        __handle_generated_id(request)
+        id_generated = __handle_generated_id(request)
+        global __session_id
+        __session_id = str(id_generated.id())
         
         try:
             if inspect.iscoroutinefunction(func):
@@ -78,7 +89,9 @@ def __handle_generated_id(request: Request) -> IdGenerated:
         raise HTTPException(status_code=401, detail="X-Session-ID header required")
     
     try:
-        id_generated = session_id_to_id_generated(session_id_header)
+        id_generated = get_generated_id(session_id_header)
+        if not id_generated:
+            raise HTTPException(status_code=401, detail="Session not found")
 
         if id_generated.is_session_expired():
             raise HTTPException(status_code=401, detail="Session expired")
@@ -86,6 +99,8 @@ def __handle_generated_id(request: Request) -> IdGenerated:
         return id_generated
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid session ID: {str(e)}")
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Session validation error: {str(e)}")
 
@@ -113,11 +128,9 @@ def generate_id(response: Response) -> BaseResponse:
 @session_validator
 def talk_with_persona(persona_id: int, talk_request: TalkRequest, response: Response, request: Request) -> BaseResponse:
     try:
-        id_generated = __handle_generated_id(request)
-
         persona = __personas_data.get_by_id(persona_id)
 
-        history = HistoryConversation(id_generated.id(), persona.id())
+        history = HistoryConversation(__session_id, persona.id())
         messages_history = history.get_history(limit=__limit_messages_to_persona)
 
         history.append_human_conversation(talk_request.message)
@@ -143,12 +156,11 @@ def talk_with_persona(persona_id: int, talk_request: TalkRequest, response: Resp
 
 @app.get('/messages/{persona_id}')
 @session_validator
-def get_messages(persona_id: int, request: Request, response: Response) -> BaseResponse:
+def get_messages(persona_id: int, _: Request, response: Response) -> BaseResponse:
     try:
-        id_generated = __handle_generated_id(request)
         persona = __personas_data.get_by_id(persona_id)
 
-        history = HistoryConversation(id_generated.id(), persona.id())
+        history = HistoryConversation(__session_id, persona.id())
         messages_history = history.get_history(limit=__limit_messages_to_response)
 
         return messages_history_to_response(messages_history)
@@ -160,10 +172,9 @@ def get_messages(persona_id: int, request: Request, response: Response) -> BaseR
 
 @app.delete('/messages/{persona_id}')
 @session_validator
-def remove_messages(persona_id: int, request: Request, response: Response) -> BaseResponse:
+def remove_messages(persona_id: int, response: Response) -> BaseResponse:
     try:
-        id_generated = __handle_generated_id(request)
-        history = HistoryConversation(id_generated.id(), persona_id)
+        history = HistoryConversation(__session_id, persona_id)
 
         history.clear_history()
 

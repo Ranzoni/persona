@@ -4,6 +4,8 @@ import uuid
 
 from dotenv import load_dotenv
 
+from repository import Repository
+
 
 load_dotenv()
 
@@ -35,7 +37,25 @@ def generate_random_id() -> IdGenerated:
     id_generated = IdGenerated()
     id_generated.generate_id()
 
+    repo = Repository()
+    repo.connect()
+
+    repo.insert(str(id_generated.id()), id_generated.expires_in())
+
     return id_generated
+
+def get_generated_id(id: str) -> IdGenerated | None:
+    repo = Repository()
+    repo.connect()
+
+    expires_in = repo.get(id)
+    if not expires_in:
+        return None
+
+    return IdGenerated(
+        id=id,
+        expires_in=int(expires_in)
+    )
 
 def validate_secret_key(secret_to_validate: str) -> bool:
     api_secret = os.getenv('API_SECRET')

@@ -17,10 +17,17 @@ class Repository:
         self.__r = redis.Redis(host=self.__host, port=self.__port, db=0)
 
     def insert(self, key: str, value: str):
+        self.__r.set(key, value)
+        self.__r.expire(key, self.__register_expire_seconds)
+
+    def insert_list(self, key: str, value: str):
         self.__r.rpush(key, value)
         self.__r.expire(key, self.__register_expire_seconds)
+
+    def get(self, key: str) -> str:
+        return self.__r.get(key)
     
-    def get(self, key: str, limit: int = None) -> list[str]:
+    def get_list(self, key: str, limit: int = None) -> list[str]:
         if limit:
             raw_data = self.__r.lrange(key, -limit, -1)
         else:

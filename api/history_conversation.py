@@ -48,7 +48,7 @@ class HistoryConversation:
         conversation_type = ConversationType(who=who, content=content)
 
         self.__connect()
-        self.__repo.insert(
+        self.__repo.insert_list(
             key=self.__id,
             value=self.__get_conversation_as_json(conversation_type)
         )
@@ -61,7 +61,7 @@ class HistoryConversation:
 
     def get_history(self, limit: int = None) -> list[ConversationType]:
         self.__connect()
-        json_values = self.__repo.get(
+        json_values = self.__repo.get_list(
             key=self.__id,
             limit=limit
         )
