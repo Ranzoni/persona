@@ -80,10 +80,6 @@ def id_generated_to_response(id_generated: IdGenerated) -> BaseResponse:
 
 def session_id_to_id_generated(session_id: str, expires_in: int) -> IdGenerated:
     try:
-        # parts = session_id_str.split(':')
-        # if len(parts) != 2:
-        #     raise ValueError("Invalid session ID format")
-        
         uuid_str = session_id
         session_uuid = uuid.UUID(uuid_str)
         expires_timestamp = expires_in

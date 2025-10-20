@@ -20,6 +20,8 @@ window.onload = async function() {
         await loadPreviousMessages();
     } catch (err) {
         console.log(err);
+        showToast('Não foi possível iniciar a conversa com o Persona.');
+        setUIBusy(true);
     } finally {
         endLoading();
     }
@@ -98,12 +100,13 @@ async function sendMessage() {
     }
 }
 
-function setUIBusy(isBusy){
+function setUIBusy(isBusy, hasError = true) {
     $send.disabled = isBusy;
     $input.disabled = isBusy;
 
     if (isBusy) {
-        $send.innerText = 'Aguardando...'; 
+        $clear.disabled = hasError;
+        $send.innerText = 'Aguardando...';
     } else {
         $send.innerText = 'Enviar';
     }

@@ -5,6 +5,7 @@ window.onload = async function() {
         await loadPersonas();
     } catch (err) {
         console.log(err);
+        showToast('Não foi possível carregar os personas.');
     } finally {
         endLoading();
     }
@@ -20,6 +21,8 @@ async function loadPersonas() {
         throw new Error('Não foi possível recuperar os personas.');
     }
 
+    $personasSelect.innerHtml = '';
+    removeOptions();
     res.forEach(persona => {
         handlePersonaOption(persona.id, persona.name);
     });
@@ -41,3 +44,11 @@ $startChatButton.addEventListener('click', () => {
 
     window.location.href = `./pages/chat.html?id=${personaId}`;
 });
+
+function removeOptions() {
+   let i, L = $personasSelect.options.length - 1;
+
+   for(i = L; i >= 0; i--) {
+      $personasSelect.remove(i);
+   }
+}
