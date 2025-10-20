@@ -24,11 +24,15 @@ __limit_messages_to_response = int(os.getenv('LIMIT_MESSAGES_TO_RESPONSE'))
 
 __personas_data = PersonasData()
 
+
+__allow_origins = os.getenv('ALLOW_ORIGINS')
+__allow_credentials = bool(os.getenv('ALLOW_CREDENTIALS'))
+
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
-    allow_credentials=True,
+    allow_origins=__allow_origins.split(','),
+    allow_credentials=__allow_credentials,
     allow_methods=['*'],
     allow_headers=['*'],
 )
