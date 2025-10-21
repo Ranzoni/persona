@@ -7,8 +7,10 @@ namespace PersonaConfig
     public partial class FormPersonaConfig : Form
     {
         private readonly PersonaService _service;
-        private string _buttonSavePersonaOriginalText;
+        private readonly string _buttonSavePersonaOriginalText;
         private readonly Persona? _persona;
+
+        public bool EditMode { get => _persona is not null; }
 
         public FormPersonaConfig(PersonaService service, Persona? persona)
         {
@@ -30,29 +32,65 @@ namespace PersonaConfig
             SetButtonState(false);
 
             bool success;
-            if (_persona is null)
-            {
-                var newPersona = new Persona(textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
-                success = HandleServiceAction(() => _service.Add(newPersona));
-            }
+            if (EditMode)
+                success = UpdatePersona();
             else
-            {
-                var updatedPersona = new Persona(_persona.Id, textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
-                success = HandleServiceAction(() => _service.Update(updatedPersona));
-            }
+                success = CreatePersona();
 
             SetButtonState(true);
 
             if (!success)
+            {
+                MessageBox.Show("Não foi possível salvar o Persona.");
                 return;
+            }
 
             DialogResult = DialogResult.OK;
             Close();
         }
 
+        private bool CreatePersona()
+        {
+            var newPersona = new Persona(textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
+
+            Persona? personaCreated = null;
+            var success = HandleServiceAction(() =>
+            {
+                personaCreated = _service.Add(newPersona);
+            });
+            if (!success || personaCreated is null)
+                return false;
+
+            return UploadImage(personaCreated);
+        }
+
+        private bool UpdatePersona()
+        {
+            if (_persona is null)
+                return false;
+
+            var uploadSuccess = UploadImage(_persona);
+            if (!uploadSuccess)
+                return false;
+
+            var updatedPersona = new Persona(_persona.Id, textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
+            return HandleServiceAction(() => _service.Update(updatedPersona));
+        }
+
+        private bool UploadImage(Persona persona)
+        {
+            if (persona is null || pbPersonaImg.Image is null)
+                return false;
+
+            using var ms = new MemoryStream();
+            pbPersonaImg.Image.Save(ms, pbPersonaImg.Image.RawFormat);
+            var imageBytes = ms.ToArray();
+            var fileExtension = Path.GetExtension(labelImgName.Text).TrimStart('.').ToLower();
+            return HandleServiceAction(() => _service.UploadImage(persona.Id, imageBytes, labelImgName.Text, fileExtension));
+        }
+
         private void buttonDeletePersona_Click(object sender, EventArgs e)
         {
-            // ask for confirmation
             var result = MessageBox.Show("Tem certeza que deseja excluir este persona?", "Confirmação", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             if (result != DialogResult.Yes)
                 return;
@@ -99,6 +137,7 @@ namespace PersonaConfig
 
             textBoxPersonaName.Text = _persona.Name;
             richTextBoxPersonaPrompt.Text = _persona.Prompt;
+            labelImgName.Text = Path.GetFileName(_persona.FileName);
             buttonDeletePersona.Visible = true;
         }
 
@@ -110,6 +149,9 @@ namespace PersonaConfig
 
             if (string.IsNullOrWhiteSpace(richTextBoxPersonaPrompt.Text))
                 messages.Add("O prompt do persona não foi preenchido.");
+
+            if (pbPersonaImg.Image is null)
+                messages.Add("A imagem do persona não foi carregada.");
 
             if (messages.Count != 0)
             {
@@ -126,6 +168,31 @@ namespace PersonaConfig
             buttonDeletePersona.Enabled = enabled;
             buttonSavePersona.Text = enabled ? _buttonSavePersonaOriginalText : "Aguarde";
             Cursor = enabled ? Cursors.Default : Cursors.WaitCursor;
+        }
+
+        private void buttonUploadImg_Click(object sender, EventArgs e)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp|All Files|*.*",
+                Title = "Select an Image File"
+            };
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    pbPersonaImg.Image = Image.FromFile(openFileDialog.FileName);
+                    pbPersonaImg.SizeMode = PictureBoxSizeMode.Zoom;
+
+                    labelImgName.Text = Path.GetFileName(openFileDialog.FileName);
+                    labelImgName.Visible = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Falha ao carregar a imagem: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
     }
 }

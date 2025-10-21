@@ -1,5 +1,7 @@
 ﻿using PersonaConfig.Infraestructure.Exceptions;
 using PersonaConfig.Infraestructure.Models;
+using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace PersonaConfig.Infraestructure.Services
@@ -42,14 +44,14 @@ namespace PersonaConfig.Infraestructure.Services
             return HandleResponse<Persona>(response, "Error to get the persona");
         }
 
-        public void Add(Persona persona)
+        public Persona? Add(Persona persona)
         {
             var jsonContent = JsonSerializer.Serialize(persona);
             var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
             content.Headers.Add("X-Secret-Key", _secret);
             var response = _httpClient.PostAsync("persona", content).Result;
-            HandleResponse<Persona>(response, "Error to add the persona");
+            return HandleResponse<Persona>(response, "Error to add the persona");
         }
 
         public void Update(Persona persona)
@@ -62,13 +64,25 @@ namespace PersonaConfig.Infraestructure.Services
             HandleResponse<Persona>(response, "Error to update the persona");
         }
 
-
         public void Delete(int id)
         {
             var request = new HttpRequestMessage(HttpMethod.Delete, $"persona/{id}");
             request.Headers.Add("X-Secret-Key", _secret);
             var response = _httpClient.SendAsync(request).Result;
             HandleResponse<string>(response, "Error to delete the persona");
+        }
+
+        public void UploadImage(int personaId, byte[] image, string fileName, string fileExtension)
+        {
+            using var content = new MultipartFormDataContent();
+            var imageContent = new ByteArrayContent(image);
+            imageContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue($"image/{fileExtension}");
+
+            content.Add(imageContent, "file", fileName);
+
+            content.Headers.Add("X-Secret-Key", _secret);
+            var response = _httpClient.PostAsync($"persona/{personaId}/upload", content).Result;
+            HandleResponse<Persona>(response, "Error to upload the persona image");
         }
 
         private static T? HandleResponse<T>(HttpResponseMessage response, string errorResponseMessage)

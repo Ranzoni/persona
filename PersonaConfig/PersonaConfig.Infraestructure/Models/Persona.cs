@@ -14,6 +14,12 @@ namespace PersonaConfig.Infraestructure.Models
         [JsonPropertyName("prompt")]
         public string Prompt { get; private set; }
 
+        [JsonPropertyName("fileName")]
+        public string FileName { get; private set; }
+
+        [JsonPropertyName("image")]
+        public string Image { get; private set; }
+
         public Persona(string name, string prompt)
         {
             if (string.IsNullOrWhiteSpace(name))

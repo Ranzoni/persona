@@ -59,6 +59,7 @@ def persona_to_response(persona: Persona, image_path: str) -> BaseResponse:
         'id': persona.id(),
         'name': persona.name(),
         'prompt': persona.prompt(),
+        'fileName': persona.image(),
         'image': f'{image_path}/{persona.image()}'
     }
 

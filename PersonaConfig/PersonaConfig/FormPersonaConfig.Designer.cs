@@ -34,18 +34,22 @@
             labelPersonaName = new Label();
             labelPersonaPrompt = new Label();
             buttonDeletePersona = new Button();
+            pbPersonaImg = new PictureBox();
+            buttonUploadImg = new Button();
+            labelImgName = new Label();
+            ((System.ComponentModel.ISupportInitialize)pbPersonaImg).BeginInit();
             SuspendLayout();
             // 
             // textBoxPersonaName
             // 
-            textBoxPersonaName.Location = new Point(12, 26);
+            textBoxPersonaName.Location = new Point(12, 155);
             textBoxPersonaName.Name = "textBoxPersonaName";
             textBoxPersonaName.Size = new Size(400, 23);
             textBoxPersonaName.TabIndex = 0;
             // 
             // richTextBoxPersonaPrompt
             // 
-            richTextBoxPersonaPrompt.Location = new Point(12, 94);
+            richTextBoxPersonaPrompt.Location = new Point(12, 205);
             richTextBoxPersonaPrompt.Name = "richTextBoxPersonaPrompt";
             richTextBoxPersonaPrompt.Size = new Size(400, 193);
             richTextBoxPersonaPrompt.TabIndex = 1;
@@ -53,7 +57,7 @@
             // 
             // buttonSavePersona
             // 
-            buttonSavePersona.Location = new Point(337, 293);
+            buttonSavePersona.Location = new Point(335, 410);
             buttonSavePersona.Name = "buttonSavePersona";
             buttonSavePersona.Size = new Size(75, 23);
             buttonSavePersona.TabIndex = 2;
@@ -64,7 +68,7 @@
             // labelPersonaName
             // 
             labelPersonaName.AutoSize = true;
-            labelPersonaName.Location = new Point(12, 9);
+            labelPersonaName.Location = new Point(12, 137);
             labelPersonaName.Name = "labelPersonaName";
             labelPersonaName.Size = new Size(40, 15);
             labelPersonaName.TabIndex = 3;
@@ -73,7 +77,7 @@
             // labelPersonaPrompt
             // 
             labelPersonaPrompt.AutoSize = true;
-            labelPersonaPrompt.Location = new Point(14, 76);
+            labelPersonaPrompt.Location = new Point(10, 187);
             labelPersonaPrompt.Name = "labelPersonaPrompt";
             labelPersonaPrompt.Size = new Size(47, 15);
             labelPersonaPrompt.TabIndex = 4;
@@ -83,7 +87,7 @@
             // 
             buttonDeletePersona.BackColor = SystemColors.Control;
             buttonDeletePersona.Image = Properties.Resources.trash;
-            buttonDeletePersona.Location = new Point(12, 290);
+            buttonDeletePersona.Location = new Point(12, 404);
             buttonDeletePersona.Name = "buttonDeletePersona";
             buttonDeletePersona.Size = new Size(30, 29);
             buttonDeletePersona.TabIndex = 5;
@@ -91,11 +95,42 @@
             buttonDeletePersona.Visible = false;
             buttonDeletePersona.Click += buttonDeletePersona_Click;
             // 
+            // pbPersonaImg
+            // 
+            pbPersonaImg.Location = new Point(218, 12);
+            pbPersonaImg.Name = "pbPersonaImg";
+            pbPersonaImg.Size = new Size(125, 125);
+            pbPersonaImg.TabIndex = 6;
+            pbPersonaImg.TabStop = false;
+            // 
+            // buttonUploadImg
+            // 
+            buttonUploadImg.Location = new Point(37, 72);
+            buttonUploadImg.Name = "buttonUploadImg";
+            buttonUploadImg.Size = new Size(147, 23);
+            buttonUploadImg.TabIndex = 7;
+            buttonUploadImg.Text = "Carregar imagem";
+            buttonUploadImg.UseVisualStyleBackColor = true;
+            buttonUploadImg.Click += buttonUploadImg_Click;
+            // 
+            // labelImgName
+            // 
+            labelImgName.AutoSize = true;
+            labelImgName.Location = new Point(37, 54);
+            labelImgName.Name = "labelImgName";
+            labelImgName.Size = new Size(85, 15);
+            labelImgName.TabIndex = 8;
+            labelImgName.Text = "labelImgName";
+            labelImgName.Visible = false;
+            // 
             // FormPersonaConfig
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(422, 325);
+            ClientSize = new Size(422, 442);
+            Controls.Add(labelImgName);
+            Controls.Add(buttonUploadImg);
+            Controls.Add(pbPersonaImg);
             Controls.Add(buttonDeletePersona);
             Controls.Add(labelPersonaPrompt);
             Controls.Add(labelPersonaName);
@@ -106,6 +141,7 @@
             Name = "FormPersonaConfig";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Persona";
+            ((System.ComponentModel.ISupportInitialize)pbPersonaImg).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -118,5 +154,8 @@
         private Label labelPersonaName;
         private Label labelPersonaPrompt;
         private Button buttonDeletePersona;
+        private PictureBox pbPersonaImg;
+        private Button buttonUploadImg;
+        private Label labelImgName;
     }
 }
