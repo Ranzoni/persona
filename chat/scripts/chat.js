@@ -131,6 +131,7 @@ function handleFailToCommunicateWithPersona() {
 }
 
 $send.addEventListener('click', sendMessage);
+
 $clear.addEventListener('click', async () => {
     $messages.innerHTML= '';
     conversation.length= 0;
