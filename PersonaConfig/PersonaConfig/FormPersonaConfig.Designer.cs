@@ -97,9 +97,10 @@
             // 
             // pbPersonaImg
             // 
-            pbPersonaImg.Location = new Point(218, 12);
+            pbPersonaImg.Location = new Point(242, 12);
             pbPersonaImg.Name = "pbPersonaImg";
             pbPersonaImg.Size = new Size(125, 125);
+            pbPersonaImg.SizeMode = PictureBoxSizeMode.Zoom;
             pbPersonaImg.TabIndex = 6;
             pbPersonaImg.TabStop = false;
             // 

@@ -15,10 +15,10 @@ namespace PersonaConfig.Infraestructure.Models
         public string Prompt { get; private set; }
 
         [JsonPropertyName("fileName")]
-        public string FileName { get; private set; }
+        public string? FileName { get; private set; }
 
         [JsonPropertyName("image")]
-        public string Image { get; private set; }
+        public string? Image { get; private set; }
 
         public Persona(string name, string prompt)
         {
@@ -29,13 +29,19 @@ namespace PersonaConfig.Infraestructure.Models
             Prompt = prompt;
         }
 
-        [JsonConstructor]
         public Persona(int id, string name, string prompt) : this(name, prompt)
         {
             if (id <= 0)
                 throw new PersonaException("Id must be greater than zero.");
 
             Id = id;
+        }
+
+        [JsonConstructor]
+        public Persona(int id, string name, string prompt, string fileName, string image) : this(id, name, prompt)
+        {
+            FileName = fileName;
+            Image = image;
         }
     }
 }

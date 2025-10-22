@@ -82,7 +82,7 @@ namespace PersonaConfig.Infraestructure.Services
 
             content.Headers.Add("X-Secret-Key", _secret);
             var response = _httpClient.PostAsync($"persona/{personaId}/upload", content).Result;
-            HandleResponse<Persona>(response, "Error to upload the persona image");
+            HandleResponse<string>(response, "Error to upload the persona image");
         }
 
         private static T? HandleResponse<T>(HttpResponseMessage response, string errorResponseMessage)

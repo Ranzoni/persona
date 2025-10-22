@@ -132,12 +132,17 @@ namespace PersonaConfig
 
         private void PopulateFields()
         {
-            if (_persona is null)
+            if (!EditMode)
                 return;
 
-            textBoxPersonaName.Text = _persona.Name;
-            richTextBoxPersonaPrompt.Text = _persona.Prompt;
-            labelImgName.Text = Path.GetFileName(_persona.FileName);
+            textBoxPersonaName.Text = _persona?.Name;
+            richTextBoxPersonaPrompt.Text = _persona?.Prompt;
+            labelImgName.Text = Path.GetFileName(_persona?.FileName);
+            if (!string.IsNullOrEmpty(_persona?.Image))
+            {
+                pbPersonaImg.Load(_persona.Image);
+                labelImgName.Visible = true;
+            }
             buttonDeletePersona.Visible = true;
         }
 
