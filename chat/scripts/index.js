@@ -15,7 +15,7 @@ $personasSelect = document.getElementById('personas');
 $startChatButton = document.getElementById('start-chat')
 
 async function loadPersonas() {
-    const res = await get('personas');
+    const res = await get('persona');
 
     if (!res) {
         throw new Error('Não foi possível recuperar os personas.');

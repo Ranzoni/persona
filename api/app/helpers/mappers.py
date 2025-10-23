@@ -2,10 +2,10 @@ import uuid
 
 from typing import Any
 
-from history_conversation import ConversationType
-from api_models import BaseResponse
-from persona import Persona
-from security import IdGenerated
+from app.infra.history_conversation import ConversationType
+from app.models.api_models import BaseResponse
+from app.models.persona import Persona
+from app.helpers.security import IdGenerated
 
 
 def __any_to_response(success: bool, source: Any) -> BaseResponse:

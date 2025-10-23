@@ -3,7 +3,7 @@ import os
 from langchain_ollama import ChatOllama
 from dotenv import load_dotenv
 
-from history_conversation import ConversationType
+from app.infra.history_conversation import ConversationType
 
 
 def talk(prompt: str, message: str, messages_history: list[ConversationType]):

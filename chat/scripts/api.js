@@ -1,4 +1,4 @@
-const API_URL = 'http://127.0.0.1:8000';
+const API_URL = 'http://127.0.0.1:8000/api';
 const sessionIdHeader = 'X-Session-ID';
 
 function buildHeaders(value, sendSession) {
@@ -26,8 +26,8 @@ async function get(path, sendSession = false) {
 }
 
 async function remove(path) {
-    const headers = buildHeaders(undefined, sendSession);
-    const ers = await request(path, 'DELETE', headers);
+    const headers = buildHeaders(undefined, true);
+    const res = await request(path, 'DELETE', headers);
     return res;
 }
 

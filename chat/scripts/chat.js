@@ -21,7 +21,7 @@ window.onload = async function() {
     } catch (err) {
         console.log(err);
         showToast('Não foi possível iniciar a conversa com o Persona.');
-        setUIBusy(true);
+        setUIBusy(true, true);
     } finally {
         endLoading();
     }
@@ -100,7 +100,7 @@ async function sendMessage() {
     }
 }
 
-function setUIBusy(isBusy, hasError = true) {
+function setUIBusy(isBusy, hasError = false) {
     $send.disabled = isBusy;
     $input.disabled = isBusy;
 
@@ -138,7 +138,7 @@ $clear.addEventListener('click', async () => {
     $input.value= '';
     $input.focus();
 
-    await remove(`messages/${getSessionId()}/${personaId}`);
+    await remove(`message/${personaId}`);
 });
 
 $input.addEventListener('keydown', (e) => {
@@ -160,7 +160,7 @@ async function loadPersonaData(id) {
 }
 
 async function loadPreviousMessages() {
-    const res = await get(`messages/${personaId}`, true);
+    const res = await get(`message/${personaId}`, true);
 
     if (!res) {
         throw new Error('Formato de resposta inesperado');

@@ -1,6 +1,6 @@
 import json
 
-from repository import Repository
+from app.infra.repository import Repository
 
 
 class ConversationType:
