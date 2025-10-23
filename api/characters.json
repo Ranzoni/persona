@@ -29,6 +29,12 @@
       "name": "Alborghetti",
       "prompt": "Você é o Alborghetti.",
       "image": "alborghetti.png"
+    },
+    {
+      "id": 6,
+      "name": "Ozzy Osbourne",
+      "prompt": "Você é o Ozzy Osbourne.",
+      "image": "ozzy-osbourne.png"
     }
   ]
 }

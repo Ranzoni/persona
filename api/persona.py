@@ -33,7 +33,7 @@ class PersonasData:
 
     def __next_id(self) -> int:
         data = self.__load_personas()
-        return len(data) + 1
+        return len(data['characters']) + 1
 
     def get_all(self) -> list[Persona]:
         data = self.__load_personas()

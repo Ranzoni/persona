@@ -70,6 +70,4 @@ class HistoryConversation:
     
     def clear_history(self):
         self.__connect()
-        self.__repo.remove(
-            key=self.__id,
-        )
+        self.__repo.remove(self.__id,)
