@@ -11,6 +11,7 @@ class Repository:
         self.__host = os.getenv('DB_HOST')
         self.__port = os.getenv('DB_PORT')
         self.__register_expire_seconds = os.getenv('DB_REGISTER_EXPIRE_SECONDS')
+        self.__list_limit = int(os.getenv('DB_LIST_LIMIT'))
         self.__r = None
 
     def connect(self):
@@ -22,7 +23,7 @@ class Repository:
 
     def insert_list(self, key: str, value: str):
         self.__r.rpush(key, value)
-        self.__r.ltrim(key, -20, -1)
+        self.__r.ltrim(key, -self.__list_limit, -1)
         self.__r.expire(key, self.__register_expire_seconds)
 
     def get(self, key: str) -> str:
