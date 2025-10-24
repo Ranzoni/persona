@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Request, Response, UploadFile
 
 from app.controllers.base_controller import get_personas_data, handle_bad_request, handle_unauthorized
 from app.helpers.mappers import fail_response, persona_to_response, personas_list_to_response
-from app.helpers.security import validate_secret_key
+from app.helpers.security import api_secret_validator
 from app.models.api_models import BaseResponse, PersonaRequest
 from app.services.image import get_upload_dir
 
@@ -38,16 +38,26 @@ def get_persona_by_id(id: int, response: Response, request: Request):
             message=f'Fail to get the personas: {e}'
         )
 
-@router.post('/')
-def create_persona(persona_request: PersonaRequest, request: Request, response: Response) -> BaseResponse:
+@router.get('/{id}/prompt')
+@api_secret_validator
+def get_persona_prompt(id: int, response: Response, _: Request):
     try:
-        secret_key = request.headers.get("X-Secret-Key")
-        if not validate_secret_key(secret_key):
-            return handle_unauthorized(
-                response=response,
-                message=f'Access unauthorized'
-            )
+        persona = __personas_data.get_by_id(id)
 
+        return BaseResponse(
+            success=True,
+            source=persona.prompt()
+        )
+    except Exception as e:
+        return handle_bad_request(
+            response=response,
+            message=f'Fail to get the personas: {e}'
+        )
+
+@router.post('/')
+@api_secret_validator
+def create_persona(persona_request: PersonaRequest, _: Request, response: Response) -> BaseResponse:
+    try:
         persona_created = __personas_data.include_persona(
             name=persona_request.name,
             prompt=persona_request.prompt
@@ -64,15 +74,9 @@ def create_persona(persona_request: PersonaRequest, request: Request, response: 
         )
     
 @router.put('/{id}')
-def update_persona(id: int, persona_request: PersonaRequest, request: Request, response: Response) -> BaseResponse:
+@api_secret_validator
+def update_persona(id: int, persona_request: PersonaRequest, _: Request, response: Response) -> BaseResponse:
     try:
-        secret_key = request.headers.get("X-Secret-Key")
-        if not validate_secret_key(secret_key):
-            return handle_unauthorized(
-                response=response,
-                message=f'Access unauthorized'
-            )
-        
         persona_updated = __personas_data.update_persona(
             id=id,
             name=persona_request.name,
@@ -92,15 +96,9 @@ def update_persona(id: int, persona_request: PersonaRequest, request: Request, r
         )
 
 @router.delete('/{id}')
-def remove_persona(id: int, request: Request, response: Response) -> BaseResponse:
+@api_secret_validator
+def remove_persona(id: int, _: Request, response: Response) -> BaseResponse:
     try:
-        secret_key = request.headers.get("X-Secret-Key")
-        if not validate_secret_key(secret_key):
-            return handle_unauthorized(
-                response=response,
-                message=f'Access unauthorized'
-            )
-        
         persona_removed = __personas_data.remove_persona(id)
         if not persona_removed:
             return fail_response('Persona not found.')
@@ -116,15 +114,9 @@ def remove_persona(id: int, request: Request, response: Response) -> BaseRespons
         )
 
 @router.post("/{id}/upload")
-async def upload_image(id: int, request: Request, response: Response, file: UploadFile = File(...)):
+@api_secret_validator
+async def upload_image(id: int, _: Request, response: Response, file: UploadFile = File(...)):
     try:
-        secret_key = request.headers.get("X-Secret-Key")
-        if not validate_secret_key(secret_key):
-            return handle_unauthorized(
-                response=response,
-                message=f'Access unauthorized'
-            )
-        
         file_path = os.path.join(get_upload_dir(), file.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
