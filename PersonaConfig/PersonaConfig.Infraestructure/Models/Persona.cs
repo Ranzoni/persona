@@ -5,14 +5,37 @@ namespace PersonaConfig.Infraestructure.Models
 {
     public class Persona
     {
+        private int _id;
+        private string _name = string.Empty;
+
         [JsonPropertyName("id")]
-        public int Id { get; private set; }
+        public int Id
+        {
+            get => _id;
+            private set
+            {
+                if (value <= 0)
+                    throw new PersonaException("Id must be greater than zero.");
+
+                _id = value;
+            }
+        }
 
         [JsonPropertyName("name")]
-        public string Name { get; private set; }
+        public string Name
+        { 
+            get => _name;
+            private set
+            {
+                if (string.IsNullOrWhiteSpace(value))
+                    throw new PersonaException("Name cannot be null or empty.");
+
+                _name = value;
+            }
+        }
 
         [JsonPropertyName("prompt")]
-        public string Prompt { get; private set; }
+        public string? Prompt { get; private set; }
 
         [JsonPropertyName("fileName")]
         public string? FileName { get; private set; }
@@ -22,26 +45,23 @@ namespace PersonaConfig.Infraestructure.Models
 
         public Persona(string name, string prompt)
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new PersonaException("Name cannot be null or empty.");
-
             Name = name;
             Prompt = prompt;
         }
 
         public Persona(int id, string name, string prompt) : this(name, prompt)
-        {
-            if (id <= 0)
-                throw new PersonaException("Id must be greater than zero.");
-
-            Id = id;
-        }
+            => Id = id;
 
         [JsonConstructor]
-        public Persona(int id, string name, string prompt, string fileName, string image) : this(id, name, prompt)
+        public Persona(int id, string name, string fileName, string image)
         {
+            Id = id;
+            Name = name;
             FileName = fileName;
             Image = image;
         }
+
+        public void SetPrompt(string? prompt)
+            => Prompt = prompt;
     }
 }

@@ -44,6 +44,14 @@ namespace PersonaConfig.Infraestructure.Services
             return HandleResponse<Persona>(response, "Error to get the persona");
         }
 
+        public string? GetPrompt(int id)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, $"persona/{id}/prompt");
+            request.Headers.Add("X-Secret-Key", _secret);
+            var response = _httpClient.SendAsync(request).Result;
+            return HandleResponse<string>(response, "Error to get the persona prompt");
+        }
+
         public Persona? Add(Persona persona)
         {
             var jsonContent = JsonSerializer.Serialize(persona);

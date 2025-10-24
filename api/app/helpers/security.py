@@ -169,6 +169,51 @@ def api_secret_validator(func):
 
     return validate_secret
 
+def api_secret_validator_async(func):
+    @wraps(func)
+    async def validate_secret(*args, **kwargs):
+        from app.controllers.base_controller import handle_unauthorized
+        
+        request = None
+        response = None
+        
+        sig = inspect.signature(func)
+        bound_args = sig.bind(*args, **kwargs)
+        bound_args.apply_defaults()
+        
+        for _, param_value in bound_args.arguments.items():
+            if isinstance(param_value, Request):
+                request = param_value
+            elif isinstance(param_value, Response):
+                response = param_value
+
+            if request and response:
+                break
+        
+        if not request:
+            raise HTTPException(status_code=500, detail="Request not found")
+        elif not response:
+            raise HTTPException(status_code=500, detail="Response not found")
+        
+        secret_key = request.headers.get("X-Secret-Key")
+        if not validate_secret_key(secret_key):
+            return handle_unauthorized(
+                response=response,
+                message=f'Access unauthorized'
+            )
+        
+        try:
+            if inspect.iscoroutinefunction(func):
+                return await func(*args, **kwargs)
+            else:
+                result = func(*args, **kwargs)
+                return result
+        except Exception as e:
+            print(f"Error in {func.__name__}: {e}")
+            raise
+
+    return validate_secret
+
 def get_session_id():
     global __session_id
     return __session_id

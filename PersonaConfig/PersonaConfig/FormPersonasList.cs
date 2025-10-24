@@ -28,6 +28,13 @@ namespace PersonaConfig
             }
 
             var persona = _personaService.GetById(selectedPersona.Id);
+            if (persona == null)
+            {
+                MessageBox.Show("Não foi possível carregar o persona selecionado.");
+                return;
+            }
+
+            persona.SetPrompt(_personaService.GetPrompt(selectedPersona.Id));
             OpenConfigForm(persona);
         }
 

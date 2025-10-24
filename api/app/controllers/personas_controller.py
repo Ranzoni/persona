@@ -4,7 +4,7 @@ from fastapi import APIRouter, File, Request, Response, UploadFile
 
 from app.controllers.base_controller import get_personas_data, handle_bad_request, handle_unauthorized
 from app.helpers.mappers import fail_response, persona_to_response, personas_list_to_response
-from app.helpers.security import api_secret_validator
+from app.helpers.security import api_secret_validator, api_secret_validator_async
 from app.models.api_models import BaseResponse, PersonaRequest
 from app.services.image import get_upload_dir
 
@@ -114,7 +114,7 @@ def remove_persona(id: int, _: Request, response: Response) -> BaseResponse:
         )
 
 @router.post("/{id}/upload")
-@api_secret_validator
+@api_secret_validator_async
 async def upload_image(id: int, _: Request, response: Response, file: UploadFile = File(...)):
     try:
         file_path = os.path.join(get_upload_dir(), file.filename)
