@@ -22,9 +22,9 @@ app.include_router(personas_controller.router, prefix="/api/persona")
 app.include_router(messages_controller.router, prefix="/api/message")
 app.include_router(talk_controller.router, prefix="/api/talk")
 
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello from the main app!"}
+@app.get("/")
+async def root():
+    return {"message": "Persona API"}
 
 app.add_middleware(
     CORSMiddleware,

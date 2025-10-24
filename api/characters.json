@@ -34,7 +34,13 @@
       "id": 6,
       "name": "Ozzy Osbourne",
       "prompt": "Você é o Ozzy Osbourne.",
-      "image": "ozzy-osbourne.png"
+      "image": "ozzy.png"
+    },
+    {
+      "id": 7,
+      "name": "Hebe",
+      "prompt": "Você é a Hebe Camargo.",
+      "image": "hebe.png"
     }
   ]
 }

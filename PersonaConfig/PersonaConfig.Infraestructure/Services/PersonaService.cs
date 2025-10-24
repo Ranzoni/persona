@@ -34,7 +34,7 @@ namespace PersonaConfig.Infraestructure.Services
 
         public IEnumerable<Persona> GetAll()
         {
-            var response = _httpClient.GetAsync("personas").Result;
+            var response = _httpClient.GetAsync("persona").Result;
             return HandleResponse<IEnumerable<Persona>>(response, "Error fetching personas") ?? [];
         }
 
