@@ -22,6 +22,7 @@ class Repository:
 
     def insert_list(self, key: str, value: str):
         self.__r.rpush(key, value)
+        self.__r.ltrim(key, -20, -1)
         self.__r.expire(key, self.__register_expire_seconds)
 
     def get(self, key: str) -> str:
