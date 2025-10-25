@@ -12,7 +12,7 @@ window.onload = async function() {
 };
 
 $personasSelect = document.getElementById('personas');
-$startChatButton = document.getElementById('start-chat')
+$startChatButton = document.getElementById('main-persona-button')
 
 async function loadPersonas() {
     const res = await get('persona');

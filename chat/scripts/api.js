@@ -86,6 +86,8 @@ async function handleFailRequest(res, path, method, headers, payload = undefined
             await generateId();
             await request(path, method, headers, payload);
             return false;
+        } else if (res.status === 404) {
+            window.location.href = '../404.html';
         }
 
         throw new Error('HTTP ' + res.status);
