@@ -42,3 +42,44 @@ header {
 .hidden {
     display: none !important;
 }
+
+#main-persona-button {
+    background: linear-gradient(135deg, var(--accent) 0%, #6366f1 100%);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    margin-top: 20px;
+    min-width: 140px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+#main-persona-button:hover {
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.25);
+    border-color: rgba(79, 70, 229, 0.4);
+}
+
+#main-persona-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
+}
+
+#main-persona-button:focus {
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2), 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+@media (max-width: 640px) {
+    #main-persona-button {
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        min-width: 120px;
+    }
+}
