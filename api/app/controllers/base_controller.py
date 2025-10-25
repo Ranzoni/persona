@@ -18,6 +18,14 @@ def handle_bad_request(response: Response, message: str) -> BaseResponse:
     response.status_code = 400
     return fail_response(message)
 
+def handle_not_found_request(response: Response, message: str) -> BaseResponse:
+    response.status_code = 404
+    return fail_response(message)
+
+def handle_conflict_request(response: Response, message: str) -> BaseResponse:
+    response.status_code = 409
+    return fail_response(message)
+
 @router.post('/generate-id')
 def generate_id(response: Response) -> BaseResponse:
     try:

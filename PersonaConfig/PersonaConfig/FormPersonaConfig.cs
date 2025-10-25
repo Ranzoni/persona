@@ -40,10 +40,7 @@ namespace PersonaConfig
             SetButtonState(true);
 
             if (!success)
-            {
-                MessageBox.Show("Não foi possível salvar o Persona.");
                 return;
-            }
 
             DialogResult = DialogResult.OK;
             Close();
@@ -56,25 +53,95 @@ namespace PersonaConfig
             Persona? personaCreated = null;
             var success = HandleServiceAction(() =>
             {
-                personaCreated = _service.Add(newPersona);
+                try
+                {
+                    personaCreated = _service.Add(newPersona);
+                    return true;
+                }
+                catch (PersonaServiceUnauthorizedException ex)
+                {
+                    throw new PersonaServiceUnauthorizedException(ex.Message);
+                }
+                catch (PersonaServiceConflictException)
+                {
+                    MessageBox.Show($"Este persona já existe.");
+                }
+                catch (PersonaServiceException ex)
+                {
+                    throw new PersonaServiceException(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+
+                return false;
             });
             if (!success || personaCreated is null)
                 return false;
 
-            return UploadImage(personaCreated);
+            if (!UploadImage(personaCreated))
+            {
+                try
+                {
+                    _service.Delete(personaCreated.Id);
+                }
+                catch (Exception)
+                {
+                }
+
+                return false;
+            }
+
+            return true;
         }
 
         private bool UpdatePersona()
         {
             if (_persona is null)
+            {
+                MessageBox.Show("Não foi informado um persona para alteração.");
                 return false;
+            }
 
             var uploadSuccess = UploadImage(_persona);
             if (!uploadSuccess)
+            {
+                MessageBox.Show("Não foi possível extrair a imagem do persona.");
                 return false;
+            }
 
             var updatedPersona = new Persona(_persona.Id, textBoxPersonaName.Text, richTextBoxPersonaPrompt.Text);
-            return HandleServiceAction(() => _service.Update(updatedPersona));
+            return HandleServiceAction(() =>
+            {
+                try
+                {
+                    _service.Update(updatedPersona);
+                    return true;
+                }
+                catch (PersonaServiceUnauthorizedException ex)
+                {
+                    throw new PersonaServiceUnauthorizedException(ex.Message);
+                }
+                catch (PersonaServiceConflictException)
+                {
+                    MessageBox.Show($"Este persona já existe.");
+                }
+                catch (PersonaServiceNotFoundException)
+                {
+                    MessageBox.Show($"Este persona não foi encontrado. Ele pode ter sido removido.");
+                }
+                catch (PersonaServiceException ex)
+                {
+                    throw new PersonaServiceException(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+
+                return false;
+            });
         }
 
         private bool UploadImage(Persona persona)
@@ -86,7 +153,32 @@ namespace PersonaConfig
             pbPersonaImg.Image.Save(ms, pbPersonaImg.Image.RawFormat);
             var imageBytes = ms.ToArray();
             var fileExtension = Path.GetExtension(labelImgName.Text).TrimStart('.').ToLower();
-            return HandleServiceAction(() => _service.UploadImage(persona.Id, imageBytes, labelImgName.Text, fileExtension));
+            return HandleServiceAction(() =>
+            {
+                try
+                {
+                    _service.UploadImage(persona.Id, imageBytes, labelImgName.Text, fileExtension);
+                    return true;
+                }
+                catch (PersonaServiceUnauthorizedException ex)
+                {
+                    throw new PersonaServiceUnauthorizedException(ex.Message);
+                }
+                catch (PersonaServiceNotFoundException)
+                {
+                    MessageBox.Show($"Este persona não foi encontrado. Ele pode ter sido removido.");
+                }
+                catch (PersonaServiceException ex)
+                {
+                    throw new PersonaServiceException(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+
+                return false;
+            });
         }
 
         private void buttonDeletePersona_Click(object sender, EventArgs e)
@@ -100,7 +192,32 @@ namespace PersonaConfig
 
             SetButtonState(false);
 
-            bool success = HandleServiceAction(() => _service.Delete(_persona.Id));
+            var success = HandleServiceAction(() =>
+            {
+                try
+                {
+                    _service.Delete(_persona.Id);
+                    return true;
+                }
+                catch (PersonaServiceUnauthorizedException ex)
+                {
+                    throw new PersonaServiceUnauthorizedException(ex.Message);
+                }
+                catch (PersonaServiceNotFoundException)
+                {
+                    MessageBox.Show($"Este persona não foi encontrado. Ele pode ter sido removido.");
+                }
+                catch (PersonaServiceException ex)
+                {
+                    throw new PersonaServiceException(ex.Message);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception(ex.Message);
+                }
+
+                return false;
+            });
 
             SetButtonState(true);
 
@@ -111,12 +228,15 @@ namespace PersonaConfig
             Close();
         }
 
-        private static bool HandleServiceAction(Action action)
+        private static bool HandleServiceAction(Func<bool> action)
         {
             try
             {
-                action();
-                return true;
+                return action();
+            }
+            catch (PersonaServiceUnauthorizedException)
+            {
+                MessageBox.Show($"O acesso ao servidor foi negado.");
             }
             catch (PersonaServiceException ex)
             {

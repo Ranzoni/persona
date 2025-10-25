@@ -13,7 +13,6 @@ namespace PersonaConfig
             InitializeComponent();
             MaximizeBox = false;
 
-
             _personaService = personaService;
             LoadPersonas();
         }
@@ -27,14 +26,55 @@ namespace PersonaConfig
                 return;
             }
 
-            var persona = _personaService.GetById(selectedPersona.Id);
-            if (persona == null)
+            Persona? persona = null;
+            try
             {
-                MessageBox.Show("Não foi possível carregar o persona selecionado.");
-                return;
+                persona = _personaService.GetById(selectedPersona.Id);
+            }
+            catch (PersonaServiceUnauthorizedException)
+            {
+                MessageBox.Show($"O acesso ao servidor foi negado.");
+            }
+            catch (PersonaServiceNotFoundException)
+            {
+                MessageBox.Show($"Este persona não foi encontrado. Ele pode ter sido removido.");
+            }
+            catch (PersonaServiceException ex)
+            {
+                MessageBox.Show($"Não foi possível carregar o prompt do persona: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocorreu um erro inesperado ao carregar o prompt do persona: {ex.Message}");
             }
 
-            persona.SetPrompt(_personaService.GetPrompt(selectedPersona.Id));
+            if (persona is null)
+                return;
+
+            try
+            {
+                persona.SetPrompt(_personaService.GetPrompt(selectedPersona.Id));
+            }
+            catch (PersonaServiceUnauthorizedException)
+            {
+                MessageBox.Show($"O acesso ao servidor foi negado.");
+            }
+            catch (PersonaServiceNotFoundException)
+            {
+                MessageBox.Show($"Este persona não foi encontrado. Ele pode ter sido removido.");
+            }
+            catch (PersonaServiceException ex)
+            {
+                MessageBox.Show($"Não foi possível carregar o prompt do persona: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocorreu um erro inesperado ao carregar o prompt do persona: {ex.Message}");
+            }
+
+            if (string.IsNullOrEmpty(persona.Prompt))
+                return;
+
             OpenConfigForm(persona);
         }
 

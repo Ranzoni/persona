@@ -3,6 +3,26 @@ import json
 from app.models.persona import Persona
 
 
+class PersonaNotExistsError(Exception):
+    '''
+    Persona not exists exception raised for persona id not found.
+    '''
+
+    def __init__(self):
+        self.__message = f'That persona not exists.'
+        super().__init__(self.__message)
+
+class PersonaNameExistsError(Exception):
+    '''
+    Persona name exists exception raised for persona name already included.
+
+    Attributes:
+        name -- persona name founded
+    '''
+    def __init__(self, name: str):
+        self.__message = f'There is already a persona named {name}.'
+        super().__init__(self.__message) 
+
 class PersonasData:
     def __init__(self):
         self.__file_name = 'characters.json'
@@ -17,6 +37,26 @@ class PersonasData:
     def __next_id(self) -> int:
         data = self.__load_personas()
         return len(data['characters']) + 1
+
+    def __validate_persona_id(self, id: int):
+        if not self.get_by_id(id):
+            raise PersonaNotExistsError()
+
+    def __persona_name_already_exists(self, name: str, id: int = None) -> bool:
+        data = self.__load_personas()
+
+        for character in data['characters']:
+            if str(character['name']).lower() == name.lower():
+                if id and int(character['id']) == id:
+                    continue
+
+                return True
+
+        return False
+
+    def __validate_persona_name(self, name: str, id: int = None):
+        if self.__persona_name_already_exists(name, id):
+            raise PersonaNameExistsError(name)
 
     def get_all(self) -> list[Persona]:
         data = self.__load_personas()
@@ -40,6 +80,8 @@ class PersonasData:
         return persona
     
     def include_persona(self, name: str, prompt: str) -> Persona:
+        self.__validate_persona_name(name)
+
         new_persona_dict = {
             'id': self.__next_id(),
             'name': name,
@@ -63,6 +105,9 @@ class PersonasData:
         )
     
     def update_persona(self, id: int, name: str, prompt: str, image: str = None) -> Persona | None:
+        self.__validate_persona_id(id)
+        self.__validate_persona_name(name=name, id=id)
+
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
             data = json.load(f)
 
@@ -93,6 +138,8 @@ class PersonasData:
         )
     
     def remove_persona(self, id: int) -> bool:
+        self.__validate_persona_id(id)
+        
         with open(self.__file_name, 'r+', encoding='utf-8') as f:
             data = json.load(f)
 

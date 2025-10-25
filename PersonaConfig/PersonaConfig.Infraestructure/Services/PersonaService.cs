@@ -96,7 +96,22 @@ namespace PersonaConfig.Infraestructure.Services
         private static T? HandleResponse<T>(HttpResponseMessage response, string errorResponseMessage)
         {
             if (!response.IsSuccessStatusCode)
-                throw new PersonaServiceException(errorResponseMessage);
+            {
+                var failContent = response.Content.ReadAsStringAsync().Result;
+                var failApiResponse = JsonSerializer.Deserialize<PersonaServiceResponse<string>>(failContent);
+                var exceptionMessage = failApiResponse?.Source ?? errorResponseMessage;
+
+                if (response.StatusCode.Equals(HttpStatusCode.Unauthorized))
+                    PersonaServiceException.ThrowUnauthorized(exceptionMessage);
+
+                if (response.StatusCode.Equals(HttpStatusCode.Conflict))
+                    PersonaServiceException.ThrowConflict(exceptionMessage);
+
+                if (response.StatusCode.Equals(HttpStatusCode.NotFound))
+                    PersonaServiceException.ThrowNotFound(exceptionMessage);
+
+                throw new PersonaServiceException(exceptionMessage);
+            }
 
             var content = response.Content.ReadAsStringAsync().Result;
             var apiResponse = JsonSerializer.Deserialize<PersonaServiceResponse<T>>(content);
