@@ -1,6 +1,9 @@
 import json
 
+from fastapi import UploadFile
+
 from app.models.persona import Persona
+from app.services.image import remove_image, save_image
 
 
 class PersonaNotExistsError(Exception):
@@ -104,7 +107,7 @@ class PersonasData:
             prompt=new_persona_dict['prompt']
         )
     
-    def update_persona(self, id: int, name: str, prompt: str, image: str = None) -> Persona | None:
+    def update_persona(self, id: int, name: str, prompt: str, image: UploadFile = None) -> Persona | None:
         self.__validate_persona_id(id)
         self.__validate_persona_name(name=name, id=id)
 
@@ -120,11 +123,17 @@ class PersonasData:
             if character_index is None:
                 return None
             
+            if image:
+                if character['image']:
+                    remove_image(character['image'])
+
+                save_image(image)
+            
             data['characters'][character_index] = {
                 'id': id,
                 'name': name,
                 'prompt': prompt,
-                'image': image if image else character['image']
+                'image': image.filename if image and image.filename else character['image']
             }
             
             f.seek(0)
@@ -152,11 +161,14 @@ class PersonasData:
             if character_index is None:
                 return False
             
+            image_name = data['characters'][character_index]['image']
+            remove_image(image_name)
             del data['characters'][character_index]
             
             f.seek(0)
             f.truncate()
             json.dump(data, f, ensure_ascii=False, indent=2)
+
 
         return True
     

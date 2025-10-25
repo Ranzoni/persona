@@ -1,5 +1,3 @@
-import os
-import shutil
 from fastapi import APIRouter, File, Request, Response, UploadFile
 
 from app.controllers.base_controller import get_personas_data, handle_bad_request, handle_conflict_request, handle_not_found_request
@@ -7,7 +5,7 @@ from app.helpers.mappers import fail_response, persona_to_response, personas_lis
 from app.helpers.security import api_secret_validator, api_secret_validator_async
 from app.infra.personas_data import PersonaNameExistsError, PersonaNotExistsError
 from app.models.api_models import BaseResponse, PersonaRequest
-from app.services.image import get_upload_dir
+from app.services.image import get_upload_dir, save_image
 
 
 __personas_data = get_personas_data()
@@ -154,15 +152,11 @@ async def upload_image(id: int, _: Request, response: Response, file: UploadFile
                 message='Persona not found.'
             )
         
-        file_path = os.path.join(get_upload_dir(), file.filename)
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        
         __personas_data.update_persona(
             id=id,
             name=persona.name(),
             prompt=persona.prompt(),
-            image=file.filename
+            image=file
         )
 
         return BaseResponse(
