@@ -89,6 +89,7 @@ async function sendMessage() {
             conversationObj.content += chunk;
             appendMessage(chunk, 'bot', '', answerStarted);
             answerStarted = true;
+            scrollToBottom();
         }
         
         conversation.push(conversationObj);
