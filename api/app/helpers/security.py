@@ -1,8 +1,8 @@
-from functools import wraps
 import inspect
 import os
 import uuid
 
+from functools import wraps
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from fastapi import HTTPException, Request, Response
@@ -28,6 +28,9 @@ class IdGenerated:
         self.__id = uuid.uuid4()
         self.__expires_in = self.__calculate_expire_id()
 
+    def renew_id(self):
+        self.__expires_in = self.__calculate_expire_id()
+
     def id(self) -> uuid.UUID:
         return self.__id
     
@@ -47,12 +50,14 @@ def handle_generated_id(request: Request) -> IdGenerated:
         raise HTTPException(status_code=401, detail="X-Session-ID header required")
     
     try:
-        id_generated = get_generated_id(session_id_header)
+        id_generated = __get_generated_id(session_id_header)
         if not id_generated:
             raise HTTPException(status_code=401, detail="Session not found")
 
         if id_generated.is_session_expired():
             raise HTTPException(status_code=401, detail="Session expired")
+        
+        __renew_gerenated_id(id_generated.id())
         
         return id_generated
     except ValueError as e:
@@ -73,7 +78,7 @@ def generate_random_id() -> IdGenerated:
 
     return id_generated
 
-def get_generated_id(id: str) -> IdGenerated | None:
+def __get_generated_id(id: str) -> IdGenerated | None:
     repo = Repository()
     repo.connect()
 
@@ -85,6 +90,18 @@ def get_generated_id(id: str) -> IdGenerated | None:
         id=id,
         expires_in=int(expires_in)
     )
+
+def __renew_gerenated_id(id: str):
+    id_generated = __get_generated_id(id)
+    if not id_generated:
+        return
+
+    id_generated.renew_id()
+
+    repo = Repository()
+    repo.connect()
+
+    repo.insert(id, id_generated.expires_in())
 
 def validate_secret_key(secret_to_validate: str) -> bool:
     api_secret = os.getenv('API_SECRET')
