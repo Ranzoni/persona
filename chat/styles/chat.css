@@ -164,6 +164,43 @@ footer.small{
     text-align: right;
 }
 
+/* ...existing code... */
+
+/* Chat Footer */
+.chat-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: rgba(255, 193, 7, 0.1);
+  border-top: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 0 0 8px 8px;
+  margin-top: 12px;
+}
+
+.info-icon {
+  flex-shrink: 0;
+  color: #ffc107;
+  opacity: 0.9;
+}
+
+.chat-footer-text {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .chat-footer {
+    padding: 10px 12px;
+  }
+  
+  .chat-footer-text {
+    font-size: 11px;
+  }
+}
+
 /* Responsividade */
 @media (max-width:640px) {
     .app {
